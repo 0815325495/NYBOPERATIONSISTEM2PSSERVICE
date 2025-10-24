@@ -1,0 +1,3002 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NYB OPERATION</title>
+    <style>
+        /* --- General Styles --- */
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background-color: #f8f9fa;
+            color: #343a40;
+            line-height: 1.6;
+        }
+        .container {
+            max-width: 1400px;
+            margin: auto;
+            background-color: #ffffff;
+            padding: 25px 30px;
+            border-radius: 12px;
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.07);
+            border: 1px solid #e9ecef;
+            position: relative;
+        }
+        h1 {
+            color: #0056b3;
+            text-align: center;
+            margin-bottom: 25px;
+            font-weight: 700;
+        }
+        h2 {
+            color: #005a9c;
+            border-bottom: 2px solid #eef2f5;
+            padding-bottom: 10px;
+            margin-top: 0;
+        }
+        h3 {
+            color: #343a40;
+            margin-top: 20px;
+            margin-bottom: 15px;
+        }
+        p { color: #6c757d; }
+
+        /* --- Login Screen --- */
+        #login-container {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+        }
+        .login-box {
+            width: 100%;
+            max-width: 400px;
+            padding: 40px;
+            background: #fff;
+            border-radius: 10px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+            text-align: center;
+        }
+        .login-box h2 {
+            margin-bottom: 10px;
+            border-bottom: none;
+        }
+        .login-box #login-error {
+            color: red;
+            margin-bottom: 15px;
+            min-height: 20px;
+        }
+        .remember-me-container {
+            display: flex;
+            align-items: center;
+            justify-content: flex-start;
+            margin-bottom: 20px;
+            font-size: 14px;
+        }
+        .remember-me-container input[type="checkbox"] {
+            width: auto;
+            margin: 0 8px 0 0;
+        }
+
+
+        #app-container {
+            display: none; /* Hidden by default */
+        }
+        
+        #status-container {
+            position: absolute;
+            top: 35px;
+            right: 180px;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            font-size: 14px;
+            color: #6c757d;
+        }
+        #connection-status::before {
+            content: '';
+            display: inline-block;
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            margin-right: 8px;
+            background-color: #ffc107; /* Yellow for connecting */
+        }
+        #connection-status.connected {
+            color: #28a745;
+        }
+        #connection-status.connected::before {
+            background-color: #28a745; /* Green */
+        }
+        #connection-status.disconnected {
+            color: #dc3545;
+        }
+        #connection-status.disconnected::before {
+            background-color: #dc3545; /* Red */
+        }
+
+        #logout-btn {
+            position: absolute;
+            top: 25px;
+            right: 30px;
+            background-color: #dc3545;
+        }
+        #logout-btn:hover {
+             background-color: #c82333;
+        }
+
+        /* --- Tab Navigation --- */
+        .tab-selector {
+            border-bottom: 1px solid #dee2e6;
+            margin-bottom: 25px;
+            display: flex;
+            flex-wrap: wrap;
+        }
+        .tab-link {
+            background-color: transparent;
+            color: #495057;
+            padding: 14px 20px;
+            border: none;
+            cursor: pointer;
+            font-size: 18px;
+            font-weight: 600;
+            border-bottom: 3px solid transparent;
+            transition: all 0.2s ease-in-out;
+            margin-bottom: -1px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .tab-link:hover {
+            background-color: #f8f9fa;
+            color: #0056b3;
+        }
+        .tab-link.active {
+            color: #007bff;
+            border-bottom-color: #007bff;
+        }
+        .tab-link svg {
+            width: 20px;
+            height: 20px;
+        }
+
+        /* --- UI Elements --- */
+        input[type="text"], input[type="search"], input[type="file"], textarea, input[type="password"], select, input[type="date"] {
+            width: 100%;
+            padding: 12px;
+            margin-bottom: 15px;
+            border-radius: 6px;
+            border: 1px solid #ced4da;
+            box-sizing: border-box;
+            font-size: 16px;
+            transition: border-color 0.2s, box-shadow 0.2s;
+        }
+        textarea {
+            min-height: 100px;
+            resize: vertical;
+        }
+        input:focus, textarea:focus, select:focus {
+            border-color: #80bdff;
+            outline: 0;
+            box-shadow: 0 0 0 0.2rem rgba(0,123,255,.25);
+        }
+        button {
+            background-color: #007bff;
+            color: white;
+            padding: 12px 20px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: bold;
+            margin-right: 8px;
+            transition: all 0.2s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+        button:hover { 
+            background-color: #0056b3; 
+            transform: translateY(-2px);
+            box-shadow: 0 4px 10px rgba(0,123,255,0.2);
+        }
+        button:disabled {
+            background-color: #aeb8c2;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+        button svg {
+            width: 18px;
+            height: 18px;
+        }
+        
+        /* --- Views --- */
+        .view { display: none; }
+        .view.active { display: block; }
+        
+        #admin-view, #operation-view, #search-view, #sequence-view, #dashboard-view, #edit-data-view {
+            padding: 10px;
+        }
+
+        .section-divider {
+            margin: 40px 0;
+            border-top: 1px solid #dee2e6;
+        }
+        
+        /* --- Upload Section --- */
+        .upload-area {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+        .upload-area input[type="file"] {
+            margin-bottom: 0;
+        }
+        #upload-status {
+            min-height: 40px;
+            display: flex;
+            align-items: center;
+            margin-top: 10px;
+        }
+        #upload-message {
+            margin: 0;
+            font-weight: 500;
+        }
+        #loader {
+            border: 4px solid #f3f3f3; /* Light grey */
+            border-top: 4px solid #3498db; /* Blue */
+            border-radius: 50%;
+            width: 30px;
+            height: 30px;
+            animation: spin 1s linear infinite;
+            margin-right: 15px;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        /* --- Specific Button Styles --- */
+        .confirm-ok { background-color: #28a745; }
+        .confirm-ok:hover { background-color: #218838; box-shadow: 0 4px 10px rgba(40,167,69,0.2); }
+        .confirm-ng { background-color: #dc3545; }
+        .confirm-ng:hover { background-color: #c82333; box-shadow: 0 4px 10px rgba(220,53,69,0.2); }
+        .export-btn { background-color: #17a2b8; }
+        .export-btn:hover { background-color: #138496; box-shadow: 0 4px 10px rgba(23,162,184,0.2); }
+        .edit-btn { background-color: #ffc107; color: #333; }
+        .edit-btn:hover { background-color: #e0a800; box-shadow: 0 4px 10px rgba(255,193,7,0.2); }
+        .delete-btn { background-color: #dc3545; }
+        .delete-btn:hover { background-color: #c82333; box-shadow: 0 4px 10px rgba(220,53,69,0.2); }
+
+        /* --- Table Styles --- */
+        .table-container {
+            max-height: 60vh;
+            overflow: auto;
+            margin-top: 20px;
+            border: 1px solid #dee2e6;
+            border-radius: 8px;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            white-space: nowrap;
+        }
+        th, td {
+            border-bottom: 1px solid #dee2e6;
+            padding: 12px 15px;
+            text-align: left;
+            font-size: 14px;
+        }
+        th {
+            background-color: #f8f9fa;
+            position: sticky;
+            top: 0;
+            z-index: 2;
+            font-weight: 600;
+        }
+        tr.status-ng-row { background-color: #fdd !important; }
+        tr.status-ng-row:hover { background-color: #fcc !important; }
+        tr.status-ok-row { background-color: #dfd !important; }
+        tr.status-ok-row:hover { background-color: #cfc !important; }
+        tr.status-no-hold-row { background-color: #fff3cd !important; }
+        tr.status-no-hold-row:hover { background-color: #ffeeba !important; }
+        td:first-child, th:first-child { border-left: none; }
+        td:last-child, th:last-child { border-right: none; }
+
+        /* --- Operation Result & Image Upload --- */
+        #operation-result {
+            border: 1px solid #b8daff;
+            padding: 20px;
+            margin-top: 20px;
+            background-color: #f0f8ff;
+            border-radius: 8px;
+        }
+        #operation-result h3 { margin-top: 0; color: #004085; }
+        #operation-result p { margin: 8px 0; font-size: 16px; }
+        #operation-result p span { font-weight: bold; color: #005a9c; }
+        #image-upload-section {
+            margin-top: 20px;
+            padding-top: 20px;
+            border-top: 1px dashed #ccc;
+        }
+        #image-preview {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-top: 15px;
+        }
+        #image-preview img {
+            max-width: 100px;
+            max-height: 100px;
+            border-radius: 5px;
+            border: 1px solid #ccc;
+        }
+         #status-history-list {
+            list-style-type: none;
+            padding-left: 0;
+            max-height: 150px;
+            overflow-y: auto;
+            border: 1px solid #e9ecef;
+            border-radius: 6px;
+            padding: 10px;
+            background-color: #fff;
+        }
+        #status-history-list li {
+            padding: 5px;
+            border-bottom: 1px solid #f0f0f0;
+        }
+        #status-history-list li:last-child {
+            border-bottom: none;
+        }
+
+        #camera-view {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.8);
+            z-index: 2000;
+            display: none; /* Modified */
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+        #camera-view video {
+            width: 80%;
+            max-width: 640px;
+            border-radius: 10px;
+        }
+        #camera-controls {
+            margin-top: 20px;
+        }
+        
+        /* --- Sequence View Styles --- */
+        .sequence-controls {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+        .sequence-controls label {
+            font-weight: bold;
+        }
+        .sequence-controls input[type="date"] {
+            margin-bottom: 0;
+            width: auto;
+        }
+        .sequence-layout {
+            display: flex;
+            gap: 20px;
+        }
+        .sequence-column {
+            flex: 1;
+            background-color: #f8f9fa;
+            border: 1px solid #dee2e6;
+            border-radius: 8px;
+            padding: 15px;
+            height: 70vh;
+            overflow-y: auto;
+        }
+        .sequence-column h3 {
+            text-align: center;
+            margin-top: 0;
+            padding-bottom: 10px;
+            border-bottom: 1px solid #ced4da;
+        }
+        .sequence-card {
+            background: #fff;
+            border: 1px solid #e9ecef;
+            border-radius: 6px;
+            padding: 15px;
+            margin-bottom: 10px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+            position: relative;
+        }
+        .sequence-card p {
+            margin: 0 0 8px 0;
+            font-size: 14px;
+        }
+        .sequence-card a {
+            color: #007bff;
+            text-decoration: none;
+            font-weight: bold;
+        }
+        .sequence-card a:hover {
+            text-decoration: underline;
+        }
+        .sequence-card .status-ok { color: green; font-weight: bold; }
+        .sequence-card .status-ng { color: red; font-weight: bold; }
+        .sequence-card .card-footer {
+            font-size: 12px;
+            color: #6c757d;
+            margin-top: 10px;
+            border-top: 1px solid #f0f0f0;
+            padding-top: 8px;
+        }
+
+        /* --- Dashboard View Styles --- */
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+        .dashboard-section {
+            background-color: #f8f9fa;
+            border: 1px solid #dee2e6;
+            border-radius: 8px;
+            padding: 15px;
+            max-height: 65vh;
+            overflow-y: auto;
+        }
+        .dashboard-section h3 {
+            text-align: center;
+            margin-top: 0;
+            padding-bottom: 10px;
+            border-bottom: 1px solid #ced4da;
+        }
+        .dashboard-card {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: #fff;
+            border: 1px solid #e9ecef;
+            border-radius: 6px;
+            padding: 15px;
+            margin-bottom: 10px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+            transition: transform 0.2s, box-shadow 0.2s;
+            cursor: pointer;
+        }
+        .dashboard-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+        }
+        .dashboard-card-label {
+            font-weight: 600;
+            font-size: 16px;
+        }
+        .dashboard-card-value {
+            font-size: 20px;
+            font-weight: bold;
+            color: #007bff;
+            background-color: #e7f3ff;
+            padding: 5px 10px;
+            border-radius: 5px;
+        }
+
+        /* --- Edit Data View --- */
+        #edit-card-container {
+            max-height: 70vh;
+            overflow-y: auto;
+            padding: 5px;
+        }
+        .edit-card {
+            background: #fff;
+            border: 1px solid #e9ecef;
+            border-radius: 8px;
+            margin-top: 20px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.07);
+            overflow: hidden; /* To contain border-radius on children */
+        }
+        .edit-card.status-ng-row { border-left: 5px solid #dc3545; }
+        .edit-card.status-ok-row { border-left: 5px solid #28a745; }
+        .edit-card.status-no-hold-row { border-left: 5px solid #ffc107; }
+
+        .edit-card-header {
+            background-color: #f8f9fa;
+            padding: 15px 20px;
+            border-bottom: 1px solid #e9ecef;
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 10px 20px;
+        }
+        .edit-card-header .header-item span {
+            font-size: 12px;
+            color: #6c757d;
+            font-weight: bold;
+            display: block;
+            margin-bottom: 2px;
+        }
+        .edit-card-header .header-item p {
+            margin: 0;
+            font-size: 16px;
+            font-weight: 500;
+            color: #343a40;
+        }
+
+        .edit-card.status-ng-row .edit-card-header {
+            background-color: #f8d7da;
+            color: #721c24;
+        }
+        .edit-card.status-ng-row .edit-card-header .header-item span,
+        .edit-card.status-ng-row .edit-card-header .header-item p {
+             color: #721c24;
+        }
+        .edit-card.status-ok-row .edit-card-header {
+            background-color: #d4edda;
+            color: #155724;
+        }
+         .edit-card.status-ok-row .edit-card-header .header-item span,
+         .edit-card.status-ok-row .edit-card-header .header-item p {
+             color: #155724;
+        }
+        .edit-card.status-no-hold-row .edit-card-header {
+            background-color: #fff3cd;
+            color: #856404;
+        }
+        .edit-card.status-no-hold-row .edit-card-header .header-item span,
+        .edit-card.status-no-hold-row .edit-card-header .header-item p {
+             color: #856404;
+        }
+
+        .edit-card-grid {
+            padding: 20px;
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            gap: 20px;
+        }
+        .edit-card-grid div {
+            display: flex;
+            flex-direction: column;
+        }
+        .edit-card-grid label {
+            font-weight: bold;
+            font-size: 12px;
+            color: #6c757d;
+            margin-bottom: 5px;
+        }
+        .edit-card-grid input, .edit-card-grid select {
+            margin-bottom: 0;
+        }
+
+        .edit-card-footer {
+            padding: 15px 20px;
+            background-color: #f8f9fa;
+            border-top: 1px solid #e9ecef;
+            text-align: right;
+        }
+
+        /* --- NG Modal & Cards --- */
+        #ng-cards-container {
+            padding: 0 20px 20px 20px;
+            background-color: #fff;
+            border-top: 1px solid #e9ecef;
+        }
+
+        .ng-card-layout {
+            display: flex;
+            gap: 20px;
+            margin-top: 20px;
+        }
+
+        .ng-column {
+            flex: 1;
+            border: 1px solid #dee2e6;
+            border-radius: 8px;
+            background-color: #f8f9fa;
+        }
+
+        .ng-column h4 {
+            margin: 0;
+            padding: 15px;
+            border-bottom: 1px solid #dee2e6;
+            background-color: #e9ecef;
+            border-top-left-radius: 8px;
+            border-top-right-radius: 8px;
+        }
+
+        .ng-column-content {
+            padding: 15px;
+        }
+
+        .ng-item-card {
+            background: #fff;
+            border: 1px solid #ced4da;
+            border-radius: 6px;
+            padding: 12px;
+            margin-bottom: 10px;
+            font-size: 14px;
+            position: relative;
+            border-left: 5px solid #ced4da; /* Default border */
+        }
+        .ng-item-card.status-ng {
+            border-left-color: #dc3545;
+        }
+        .ng-item-card.status-ok {
+            border-left-color: #28a745;
+        }
+
+        .ng-item-card p {
+            margin: 0 0 6px 0;
+            color: #495057;
+        }
+        .ng-item-card p span {
+            font-weight: 600;
+            color: #343a40;
+        }
+
+        .ng-item-footer {
+            margin-top: 8px;
+            padding-top: 8px;
+            font-size: 11px;
+            color: #6c757d;
+        }
+        .ng-item-footer details {
+            border: 1px solid #e9ecef;
+            border-radius: 4px;
+            padding: 5px;
+        }
+        .ng-item-footer summary {
+            cursor: pointer;
+            font-weight: bold;
+        }
+        .ng-item-footer ul {
+            list-style-type: none;
+            padding-left: 10px;
+            margin-top: 5px;
+            font-size: 10px;
+        }
+        .ng-item-footer li {
+            margin-bottom: 3px;
+        }
+
+        .ng-item-actions {
+            position: absolute;
+            top: 5px;
+            right: 5px;
+        }
+        .ng-item-actions button {
+            padding: 4px 6px;
+            font-size: 12px;
+            margin: 0 2px;
+        }
+
+        .status-toggle-btn {
+            padding: 4px 10px;
+            font-size: 12px;
+            font-weight: bold;
+            border-radius: 15px;
+            color: white;
+            border: none;
+            cursor: pointer;
+            margin-top: 5px;
+        }
+        .status-toggle-btn.status-ng {
+            background-color: #dc3545;
+        }
+        .status-toggle-btn.status-ok {
+            background-color: #28a745;
+        }
+
+
+        /* --- Modal Styles --- */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            overflow: auto;
+            background-color: rgba(0,0,0,0.5);
+            animation: fadeIn 0.3s;
+        }
+        .modal-content {
+            background-color: #fefefe;
+            margin: 10% auto;
+            padding: 25px;
+            border: 1px solid #888;
+            width: 90%;
+            max-width: 550px;
+            border-radius: 10px;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.2);
+            animation: slideIn 0.3s;
+        }
+        .close-btn {
+            color: #aaa;
+            float: right;
+            font-size: 30px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+        .close-btn:hover, .close-btn:focus { color: black; }
+        .modal-content label { display: block; margin-top: 15px; font-weight: bold; }
+
+        #confirmation-controls button {
+            width: 100px;
+            margin: 0 10px;
+        }
+
+        @keyframes fadeIn { from {opacity: 0;} to {opacity: 1;} }
+        @keyframes slideIn { from {transform: translateY(-50px);} to {transform: translateY(0);} }
+    </style>
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-storage.js"></script>
+    
+    <!-- Library for Excel handling -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <!-- Libraries for PDF Generation -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+</head>
+<body>
+
+<div id="login-container">
+    <div class="login-box">
+        <h2>NYB OPERATION LOGIN</h2>
+        <p style="color: #6c757d; margin-top: -10px; margin-bottom: 20px;">บริษัท 2PS SERVICE จำกัด</p>
+        <p id="login-error"></p>
+        <input type="text" id="username" placeholder="Username">
+        <input type="password" id="password" placeholder="Password">
+        <div class="remember-me-container">
+            <input type="checkbox" id="remember-me">
+            <label for="remember-me">จำฉันไว้เสมอ</label>
+        </div>
+        <button id="login-btn" style="width: 100%;">Login</button>
+    </div>
+</div>
+
+<div id="app-container">
+    <div class="container">
+        <h1>NYB OPERATION</h1>
+        <div id="status-container">
+            <span id="connection-status">Connecting...</span>
+            <span id="datetime-clock"></span>
+        </div>
+        <button id="logout-btn">Logout</button>
+
+        <!-- Tab navigation -->
+        <div class="tab-selector">
+            <button class="tab-link" data-view="operation-view">
+                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M19.5 22.5q-1.875 0-3.188-1.313T15 18q0-1.875 1.313-3.188T19.5 13.5q1.875 0 3.188 1.313T24 18q0 1.875-1.313 3.188T19.5 22.5ZM2.25 20.25q-.525 0-.888-.363T1 19V5q0-.525.363-.888T2.25 3.75h11.5q.525 0 .888.362T15 5v5.3q.65-.2 1.325-.287T17.75 10H20V5q0-1.05-.725-1.775T17.5 2.5h-11q-1.05 0-1.775.725T4 5v14q0 1.05.725 1.775T6.5 21.5h6.35q.15.7.413 1.35T13.9 24h-7.4q-1.05 0-1.775-.725T4 21.5v-1.25Z"/></svg>
+                Operation
+            </button>
+            <button class="tab-link" data-view="search-view">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="m19.6 21-6.3-6.3q-.75.6-1.725.95T9.5 16.25q-2.825 0-4.788-1.963T2.75 9.5q0-2.825 1.963-4.788T9.5 2.75q2.825 0 4.788 1.963T16.25 9.5q0 1.1-.35 2.075T14.95 13.3l6.3 6.3-1.65 1.4Z"/></svg>
+                ค้นหาข้อมูล
+            </button>
+            <button class="tab-link" data-view="sequence-view">
+                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M8.5 20.5v-5h7v5h-7ZM3.75 20.5v-17h16.5v17H3.75Z"/></svg>
+                Sequence
+            </button>
+            <button class="tab-link" data-view="dashboard-view">
+                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M4 22.5v-10h3.5v10H4Zm6.25 0v-17h3.5v17h-3.5Zm6.25 0v-6h3.5v6h-3.5Z"/></svg>
+                Dashboard
+            </button>
+             <button class="tab-link" data-view="edit-data-view">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M5 21.5v-1.25q0-.525.363-.888t.887-.362h1.45l9.2-9.2-2.3-2.3-9.2 9.2V18q0 .525.363-.888t.887.362h1.25Zm14.2-10.4-2.3-2.3 1.1-1.1q.4-.4.9-.4t.9.4l.5.5q.4.4.4.9t-.4.9l-1.1 1.1Z"/></svg>
+                แก้ไขข้อมูล
+            </button>
+            <button class="tab-link" data-view="admin-view">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M4 21V9.75L12 3l8 6.75V21h-6v-6h-4v6H4Z"/></svg>
+                Admin
+            </button>
+        </div>
+
+        <!-- Admin View -->
+        <div id="admin-view" class="view">
+            <h2>ส่วนของ Admin</h2>
+            <p>อัพโหลดไฟล์ Excel เพื่อเพิ่มหรืออัปเดตข้อมูล และส่งออกข้อมูลทั้งหมด</p>
+            <div class="upload-area">
+                <input type="file" id="excel-file" accept=".xlsx, .xls, .csv">
+                <button id="confirm-upload-btn" disabled>
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M11.3 18V9.95l-2.15 2.15-.9-.9 3.5-3.5 3.5 3.5-.9.9-2.15-2.15V18h-1.2ZM4 22.5q-.9 0-1.55-.65T1.8 20.3v-11q0-.9.65-1.55T4 7.1h3.15q.2-.85.8-1.5t1.4-.95q.8-.3 1.65-.3t1.65.3q.8.3 1.4.95t.8 1.5H19.3q.9 0 1.55.65t.65 1.55v11q0 .9-.65 1.55T19.3 22.5H4Z"/></svg>
+                    ยืนยันการอัพโหลด
+                </button>
+            </div>
+            <div id="upload-status">
+                <div id="loader" style="display: none;"></div>
+                <p id="upload-message"></p>
+            </div>
+            
+            <button id="export-button" class="export-btn" style="margin-top: 20px;">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M4 22.5q-.9 0-1.55-.65T1.8 20.3v-2.1q0-.375.263-.638T2.7 17.3q.375 0 .638.262t.262.638v2.1q0 .3.2.5t.5.2h15q.3 0 .5-.2t.2-.5v-2.1q0-.375.263-.638t.637-.262q.375 0 .638.262t.262.638v2.1q0 .9-.65 1.55T19.3 22.5H4Zm8-4.5L5.65 11.65q-.3-.3-.288-.7t.313-.7q.3-.3.7-.288t.7.313L11.3 15V3.75q0-.375.263-.638T12.2 3q.375 0 .638.262T13.1 3.75V15l4.25-4.25q.3-.3.7-.287t.7.312q.3.3.313.7t-.288.7L12.7 18Z"/></svg>
+                Export ข้อมูลทั้งหมด
+            </button>
+            <div class="table-container">
+                <table id="data-table">
+                    <thead></thead>
+                    <tbody>
+                        <tr><td colspan="50" style="text-align:center;">กรุณาอัพโหลดไฟล์ Excel เพื่อแสดงข้อมูล</td></tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <hr class="section-divider">
+
+            <h3>จัดการผู้ใช้งาน (User Management)</h3>
+            <div id="user-management-section">
+                <div class="login-box" style="max-width: none; box-shadow: none; padding: 20px; border: 1px solid #dee2e6; text-align: left;">
+                    <h4>เพิ่มผู้ใช้ใหม่</h4>
+                    <input type="text" id="new-username" placeholder="Username ใหม่">
+                    <input type="password" id="new-password" placeholder="Password ใหม่">
+                    <select id="new-user-role">
+                        <option value="operation">Operation</option>
+                        <option value="SJWD">SJWD</option>
+                        <option value="admin">Admin</option>
+                    </select>
+                    <button id="add-user-btn">เพิ่มผู้ใช้</button>
+                </div>
+                <div class="table-container">
+                    <table id="user-list-table">
+                        <thead>
+                            <tr>
+                                <th>Username</th>
+                                <th>Role</th>
+                                <th>Action</th>
+                            </tr>
+                        </thead>
+                        <tbody></tbody>
+                    </table>
+                </div>
+            </div>
+
+        </div>
+
+        <!-- Operation View -->
+        <div id="operation-view" class="view">
+            <h2>ส่วนของ Operation</h2>
+            <p>กรุณากรอกเลข VIN (เต็ม หรือ 5 ตัวท้าย) เพื่อค้นหาและยืนยันสถานะรถ</p>
+            <input type="text" id="vin-search" placeholder="กรอกเลข Vin แบบเต็ม หรือ 5 ตัวท้าย...">
+            <button id="search-vin-btn">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="m19.6 21-6.3-6.3q-.75.6-1.725.95T9.5 16.25q-2.825 0-4.788-1.963T2.75 9.5q0-2.825 1.963-4.788T9.5 2.75q2.825 0 4.788 1.963T16.25 9.5q0 1.1-.35 2.075T14.95 13.3l6.3 6.3-1.65 1.4Z"/></svg>
+                ค้นหา
+            </button>
+            <div id="operation-result">
+                <p>-- ผลการค้นหาจะแสดงที่นี่ --</p>
+            </div>
+            <hr class="section-divider">
+            <h3 id="operation-history-header">ประวัติการตรวจสอบ</h3>
+             <div class="sequence-controls">
+                <label for="history-date">เลือกวันที่:</label>
+                <input type="date" id="history-date">
+                <button id="export-history-btn" class="export-btn">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M4 22.5q-.9 0-1.55-.65T1.8 20.3v-2.1q0-.375.263-.638T2.7 17.3q.375 0 .638.262t.262.638v2.1q0 .3.2.5t.5.2h15q.3 0 .5-.2t.2-.5v-2.1q0-.375.263-.638t.637-.262q.375 0 .638.262t.262.638v2.1q0 .9-.65 1.55T19.3 22.5H4Zm8-4.5L5.65 11.65q-.3-.3-.288-.7t.313-.7q.3-.3.7-.288t.7.313L11.3 15V3.75q0-.375.263-.638T12.2 3q.375 0 .638.262T13.1 3.75V15l4.25-4.25q.3-.3.7-.287t.7.312q.3.3.313.7t-.288.7L12.7 18Z"/></svg>
+                    Export ประวัติ
+                </button>
+            </div>
+            <div id="operation-history-container" class="sequence-column" style="height: 40vh;">
+                <p>ยังไม่มีประวัติการตรวจสอบ</p>
+            </div>
+        </div>
+        
+        <!-- Search View -->
+        <div id="search-view" class="view">
+            <h2>ค้นหาข้อมูล</h2>
+            <p>วางเลข Vin ที่ต้องการค้นหา สามารถคั่นด้วยเว้นวรรค, ขึ้นบรรทัดใหม่ หรือวางติดกันได้</p>
+            <textarea id="multi-vin-search-input" placeholder="LGXCH4CD9S2106369LGXCH4CD6S2117748..."></textarea>
+            <button id="multi-vin-search-btn">ค้นหา VIN</button>
+            <button id="export-filtered-button" class="export-btn">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M4 22.5q-.9 0-1.55-.65T1.8 20.3v-2.1q0-.375.263-.638T2.7 17.3q.375 0 .638.262t.262.638v2.1q0 .3.2.5t.5.2h15q.3 0 .5-.2t.2-.5v-2.1q0-.375.263-.638t.637-.262q.375 0 .638.262t.262.638v2.1q0 .9-.65 1.55T19.3 22.5H4Zm8-4.5L5.65 11.65q-.3-.3-.288-.7t.313-.7q.3-.3.7-.288t.7.313L11.3 15V3.75q0-.375.263-.638T12.2 3q.375 0 .638.262T13.1 3.75V15l4.25-4.25q.3-.3.7-.287t.7.312q.3.3.313.7t-.288.7L12.7 18Z"/></svg>
+                Export ผลการค้นหา
+            </button>
+            <div class="table-container">
+                <table id="search-data-table">
+                    <thead></thead>
+                    <tbody>
+                        <tr><td colspan="50" style="text-align:center;">ข้อมูลทั้งหมดจะแสดงที่นี่</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        
+        <!-- Sequence View -->
+        <div id="sequence-view" class="view">
+            <h2>ลำดับการยืนยัน (Sequence)</h2>
+            <div class="sequence-controls">
+                <label for="sequence-date">เลือกวันที่:</label>
+                <input type="date" id="sequence-date">
+                <button id="export-sequence-excel-btn" class="export-btn">Export Excel</button>
+                <button id="export-sequence-pdf-btn" class="export-btn" style="background-color: #c82333;">Export PDF</button>
+            </div>
+            <div class="sequence-layout">
+                <div class="sequence-column">
+                    <h3>รายการรอยืนยัน</h3>
+                    <div id="pending-sequence-container">
+                        <p>ไม่มีรายการรอยืนยันในขณะนี้</p>
+                    </div>
+                </div>
+                <div class="sequence-column">
+                    <h3>รายการที่ยืนยันแล้ว</h3>
+                    <div id="confirmed-sequence-container">
+                         <p>ยังไม่มีรายการที่ยืนยันแล้ว</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Dashboard View -->
+        <div id="dashboard-view" class="view">
+            <h2>Dashboard</h2>
+            <p>สรุปข้อมูลภาพรวมของรถทั้งหมดในระบบ</p>
+            <div class="dashboard-grid">
+                <div class="dashboard-section">
+                    <h3>จำนวนรถตาม Model</h3>
+                    <div id="model-dashboard-container">
+                        <p>ไม่มีข้อมูล</p>
+                    </div>
+                </div>
+                <div class="dashboard-section">
+                    <h3>จำนวนรถตาม Status</h3>
+                    <div id="status-dashboard-container">
+                        <p>ไม่มีข้อมูล</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Edit Data View -->
+        <div id="edit-data-view" class="view">
+            <h2>แก้ไขข้อมูลรถ</h2>
+            <p>ค้นหารถด้วย VIN เพื่อแก้ไขข้อมูล</p>
+            <input type="search" id="edit-vin-search-input" placeholder="กรอก VIN เพื่อค้นหา...">
+            <button id="edit-vin-search-btn">ค้นหา</button>
+            <div id="edit-card-container">
+                <p>-- ผลการค้นหาจะแสดงที่นี่ --</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Edit Modal for Admin (Used for quick edits in table view) -->
+<div id="edit-modal" class="modal">
+    <div class="modal-content">
+        <span class="close-btn">&times;</span>
+        <h3>แก้ไขข้อมูลรถ</h3>
+        <p><strong>VIN:</strong> <span id="modal-vin"></span></p>
+        <label for="modal-status">สถานะ (Vin of Status):</label>
+        <input type="text" id="modal-status" placeholder="เช่น OK, NG, PDI">
+        <label for="modal-remark">Remark:</label>
+        <input type="text" id="modal-remark" placeholder="รายละเอียดความเสียหาย...">
+        <button id="save-changes-btn">บันทึกการเปลี่ยนแปลง</button>
+    </div>
+</div>
+
+<!-- VIN List Modal -->
+<div id="vin-list-modal" class="modal">
+    <div class="modal-content">
+        <span class="close-btn" id="vin-list-close-btn">&times;</span>
+        <h3 id="vin-list-title"></h3>
+        <div id="vin-list-content" style="max-height: 400px; overflow-y: auto; word-wrap: break-word;"></div>
+    </div>
+</div>
+
+<!-- Camera Modal -->
+<div id="camera-view" class="modal">
+    <div class="modal-content" style="max-width: 700px; text-align: center;">
+        <h3>ถ่ายภาพ</h3>
+        <video id="camera-feed" playsinline autoplay></video>
+        <canvas id="camera-canvas" style="display:none;"></canvas>
+        <div id="camera-controls">
+            <button id="capture-btn">ถ่ายภาพ</button>
+            <button id="cancel-camera-btn" class="delete-btn">ยกเลิก</button>
+        </div>
+    </div>
+</div>
+
+<!-- NG Defect Modal -->
+<div id="ng-modal" class="modal">
+    <div class="modal-content">
+        <span class="close-btn" id="ng-modal-close-btn">&times;</span>
+        <h3 id="ng-modal-title">เพิ่ม NG Defect</h3>
+        <p><strong>VIN:</strong> <span id="ng-modal-vin"></span></p>
+        
+        <label for="ng-type">ประเภท Defect:</label>
+        <select id="ng-type">
+            <option value="yard">Defect Yard</option>
+            <option value="factory">Defect โรงงาน</option>
+        </select>
+
+        <label for="ng-location">ตำแหน่ง NG:</label>
+        <input type="text" id="ng-location" placeholder="เช่น ประตูหน้าขวา">
+
+        <label for="ng-item">รายการ NG:</label>
+        <input type="text" id="ng-item" placeholder="เช่น รอยขีดข่วน">
+
+        <label for="ng-repairer">ผู้ซ่อม:</label>
+        <input type="text" id="ng-repairer" placeholder="ชื่อผู้รับผิดชอบ">
+
+        <button id="save-ng-btn">บันทึก NG</button>
+    </div>
+</div>
+
+<!-- Confirmation Modal -->
+<div id="confirmation-modal" class="modal">
+    <div class="modal-content" style="max-width: 400px; text-align: center;">
+        <h3 id="confirmation-title">ยืนยันการกระทำ</h3>
+        <p id="confirmation-message" style="margin: 20px 0; font-size: 16px;"></p>
+        <div id="confirmation-controls">
+            <button id="confirm-action-btn" class="confirm-ok">ยืนยัน</button>
+            <button id="cancel-action-btn" class="delete-btn">ยกเลิก</button>
+        </div>
+    </div>
+</div>
+
+<!-- Vehicle Detail Modal -->
+<div id="vehicle-detail-modal" class="modal">
+    <div class="modal-content" style="max-width: 800px;">
+        <span class="close-btn" id="vehicle-detail-close-btn">&times;</span>
+        <h3 id="detail-modal-title">รายละเอียดรถยนต์</h3>
+        <div id="vehicle-detail-content" class="edit-card-header" style="margin-bottom: 20px;">
+            <!-- General info will be populated here -->
+        </div>
+        <div id="vehicle-detail-ng-cards">
+            <!-- NG Defect cards will be populated here -->
+        </div>
+    </div>
+</div>
+
+
+<script>
+    // --- Firebase Configuration ---
+    const firebaseConfig = {
+      apiKey: "AIzaSyCG_hullmhQLLYyQ_wSWvE-IyYV9gdmlo8",
+      authDomain: "nybtreatment.firebaseapp.com",
+      databaseURL: "https://nybtreatment-default-rtdb.asia-southeast1.firebasedatabase.app",
+      projectId: "nybtreatment",
+      storageBucket: "finalcheckpm.appspot.com",
+      messagingSenderId: "813460424519",
+      appId: "1:813460424519:web:359e53bf9bae565f6e6e62",
+      measurementId: "G-V3BDVVZF5W"
+    };
+
+    // --- Initialize Firebase ---
+    const app = firebase.initializeApp(firebaseConfig);
+    const database = firebase.database();
+    const storage = firebase.storage();
+
+    // --- Global State ---
+    let users = {};
+    let currentUsername = null;
+    let currentUserRole = null;
+    let vehicleData = [];
+    let filteredVehicleData = [];
+    let pendingSequence = [];
+    let confirmedSequence = [];
+    let tableHeaders = [];
+    let searchTableHeaders = [];
+    let currentEditIndex = -1;
+    let fileToUpload = null;
+    let currentVehicleForPhoto = null;
+    let clockInterval = null;
+    let currentSequenceItemKey = null;
+    let currentVehicleIndexForNg = -1;
+    let currentNgIndexToEdit = -1;
+    let confirmationCallback = null;
+    
+    // --- Database References ---
+    const usersRef = database.ref('users');
+    const vehiclesRef = database.ref('vehicles');
+    const sequenceRef = database.ref('sequence');
+
+    // --- DOM Elements ---
+    const loginContainer = document.getElementById('login-container');
+    const appContainer = document.getElementById('app-container');
+    const loginBtn = document.getElementById('login-btn');
+    const logoutBtn = document.getElementById('logout-btn');
+    const usernameInput = document.getElementById('username');
+    const passwordInput = document.getElementById('password');
+    const loginError = document.getElementById('login-error');
+    const connectionStatusEl = document.getElementById('connection-status');
+    const datetimeClockEl = document.getElementById('datetime-clock');
+    
+    const addUserBtn = document.getElementById('add-user-btn');
+    const newUserUsernameInput = document.getElementById('new-username');
+    const newUserPasswordInput = document.getElementById('new-password');
+    const newUserRoleSelect = document.getElementById('new-user-role');
+    const userListTableBody = document.querySelector('#user-list-table tbody');
+
+    const fileInput = document.getElementById('excel-file');
+    const confirmUploadBtn = document.getElementById('confirm-upload-btn');
+    const loader = document.getElementById('loader');
+    const uploadMessage = document.getElementById('upload-message');
+    const multiVinSearchInput = document.getElementById('multi-vin-search-input');
+    const multiVinSearchBtn = document.getElementById('multi-vin-search-btn');
+    const dataTableBody = document.querySelector('#data-table tbody');
+    const dataTableHeader = document.querySelector('#data-table thead');
+    const searchDataTableBody = document.querySelector('#search-data-table tbody');
+    const searchDataTableHeader = document.querySelector('#search-data-table thead');
+    const vinSearchInput = document.getElementById('vin-search');
+    const searchVinBtn = document.getElementById('search-vin-btn');
+    const operationResultDiv = document.getElementById('operation-result');
+    const operationHistoryContainer = document.getElementById('operation-history-container');
+    const exportBtn = document.getElementById('export-button');
+    const exportFilteredBtn = document.getElementById('export-filtered-button');
+    const modal = document.getElementById('edit-modal');
+    const closeBtn = document.querySelector('.close-btn');
+    const saveChangesBtn = document.getElementById('save-changes-btn');
+    const modalVinSpan = document.getElementById('modal-vin');
+    const modalStatusInput = document.getElementById('modal-status');
+    const modalRemarkInput = document.getElementById('modal-remark');
+    const pendingSequenceContainer = document.getElementById('pending-sequence-container');
+    const confirmedSequenceContainer = document.getElementById('confirmed-sequence-container');
+    const sequenceDateInput = document.getElementById('sequence-date');
+    const tabLinks = document.querySelectorAll('.tab-link');
+    const vinListModal = document.getElementById('vin-list-modal');
+    const vinListCloseBtn = document.getElementById('vin-list-close-btn');
+    const vinListTitle = document.getElementById('vin-list-title');
+    const vinListContent = document.getElementById('vin-list-content');
+    
+    const cameraView = document.getElementById('camera-view');
+    const cameraFeed = document.getElementById('camera-feed');
+    const cameraCanvas = document.getElementById('camera-canvas');
+    const captureBtn = document.getElementById('capture-btn');
+    const cancelCameraBtn = document.getElementById('cancel-camera-btn');
+    let cameraStream = null;
+
+    const editVinSearchInput = document.getElementById('edit-vin-search-input');
+    const editVinSearchBtn = document.getElementById('edit-vin-search-btn');
+    const editCardContainer = document.getElementById('edit-card-container');
+
+    const ngModal = document.getElementById('ng-modal');
+    const ngModalTitle = document.getElementById('ng-modal-title');
+    const ngModalCloseBtn = document.getElementById('ng-modal-close-btn');
+    const ngModalVinSpan = document.getElementById('ng-modal-vin');
+    const saveNgBtn = document.getElementById('save-ng-btn');
+    const ngTypeSelect = document.getElementById('ng-type');
+    const ngLocationInput = document.getElementById('ng-location');
+    const ngItemInput = document.getElementById('ng-item');
+    const ngRepairerInput = document.getElementById('ng-repairer');
+
+    const confirmationModal = document.getElementById('confirmation-modal');
+    const confirmationMessage = document.getElementById('confirmation-message');
+    const confirmActionBtn = document.getElementById('confirm-action-btn');
+    const cancelActionBtn = document.getElementById('cancel-action-btn');
+
+    const historyDateInput = document.getElementById('history-date');
+    const exportHistoryBtn = document.getElementById('export-history-btn');
+    const exportSequenceExcelBtn = document.getElementById('export-sequence-excel-btn');
+    const exportSequencePdfBtn = document.getElementById('export-sequence-pdf-btn');
+    
+    const vehicleDetailModal = document.getElementById('vehicle-detail-modal');
+    const vehicleDetailCloseBtn = document.getElementById('vehicle-detail-close-btn');
+    const vehicleDetailContent = document.getElementById('vehicle-detail-content');
+    const vehicleDetailNgCards = document.getElementById('vehicle-detail-ng-cards');
+
+
+    // --- Event Listeners ---
+    loginBtn.addEventListener('click', handleLogin);
+    logoutBtn.addEventListener('click', handleLogout);
+    passwordInput.addEventListener('keyup', (e) => { if(e.key === 'Enter') handleLogin() });
+
+    addUserBtn.addEventListener('click', addUser);
+
+    fileInput.addEventListener('change', prepareFileForUpload);
+    confirmUploadBtn.addEventListener('click', processPreparedFile);
+    multiVinSearchBtn.addEventListener('click', applyMultiVinSearch);
+    searchVinBtn.addEventListener('click', searchByVin);
+    vinSearchInput.addEventListener('keyup', (event) => {
+        if (event.key === 'Enter') searchByVin();
+    });
+    editVinSearchBtn.addEventListener('click', searchAndDisplayEditCard);
+    editVinSearchInput.addEventListener('keyup', (e) => { if(e.key === 'Enter') searchAndDisplayEditCard() });
+    exportBtn.addEventListener('click', exportToExcel);
+    exportFilteredBtn.addEventListener('click', exportFilteredToExcel);
+    closeBtn.addEventListener('click', () => modal.style.display = 'none');
+    vinListCloseBtn.addEventListener('click', () => vinListModal.style.display = 'none');
+    saveChangesBtn.addEventListener('click', saveModalChanges);
+    captureBtn.addEventListener('click', captureImage);
+    cancelCameraBtn.addEventListener('click', closeCamera);
+    sequenceDateInput.addEventListener('change', renderSequenceView);
+    ngModalCloseBtn.addEventListener('click', closeNgModal);
+    saveNgBtn.addEventListener('click', saveNgDefect);
+    confirmActionBtn.addEventListener('click', () => {
+        if (typeof confirmationCallback === 'function') {
+            confirmationCallback();
+        }
+        closeConfirmationModal();
+    });
+    cancelActionBtn.addEventListener('click', closeConfirmationModal);
+    historyDateInput.addEventListener('change', renderOperationHistory);
+    exportHistoryBtn.addEventListener('click', exportOperationHistoryToExcel);
+    exportSequenceExcelBtn.addEventListener('click', exportSequenceToExcel);
+    exportSequencePdfBtn.addEventListener('click', exportSequenceToPDF);
+    vehicleDetailCloseBtn.addEventListener('click', () => vehicleDetailModal.style.display = 'none');
+
+    window.addEventListener('click', (event) => {
+        if (event.target == modal) modal.style.display = 'none';
+        if (event.target == vinListModal) vinListModal.style.display = 'none';
+        if (event.target == cameraView) closeCamera();
+        if (event.target == ngModal) closeNgModal();
+        if (event.target == confirmationModal) closeConfirmationModal();
+        if (event.target == vehicleDetailModal) vehicleDetailModal.style.display = 'none';
+    });
+    tabLinks.forEach(link => {
+        link.addEventListener('click', (e) => openView(e, e.currentTarget.dataset.view));
+    });
+
+    // --- Confirmation Modal Functions ---
+    function showConfirmationModal(message, onConfirm) {
+        confirmationMessage.textContent = message;
+        confirmationCallback = onConfirm;
+        confirmationModal.style.display = 'block';
+    }
+
+    function closeConfirmationModal() {
+        confirmationModal.style.display = 'none';
+        confirmationCallback = null;
+    }
+
+    // --- Authentication & UI Setup ---
+    function updateClock() {
+        const now = new Date();
+        const dateString = now.toLocaleDateString('th-TH', { day: '2-digit', month: 'short', year: 'numeric' });
+        const timeString = now.toLocaleTimeString('th-TH');
+        datetimeClockEl.textContent = `${dateString} ${timeString}`;
+    }
+
+    function handleLogin() {
+        const username = usernameInput.value.trim().toLowerCase();
+        const password = passwordInput.value;
+
+        usersRef.once('value', (snapshot) => {
+            const usersFromDB = snapshot.val();
+            if (!usersFromDB) { // First time setup
+                const defaultUsers = {
+                    'admin': { password: '123', role: 'admin' },
+                    'sjwd': { password: '456', role: 'SJWD' },
+                    'op': { password: '789', role: 'operation' }
+                };
+                usersRef.set(defaultUsers);
+                users = defaultUsers;
+            } else {
+                users = usersFromDB;
+            }
+
+            const user = users[username];
+            if (user && user.password === password) {
+                currentUsername = username;
+                currentUserRole = user.role;
+                loginContainer.style.display = 'none';
+                appContainer.style.display = 'block';
+                loginError.textContent = '';
+                setupUIForRole(currentUserRole);
+                attachDataListeners();
+                updateClock();
+                clockInterval = setInterval(updateClock, 1000);
+            } else {
+                loginError.textContent = 'ชื่อผู้ใช้หรือรหัสผ่านไม่ถูกต้อง';
+            }
+        });
+    }
+
+    function handleLogout() {
+        database.ref(".info/connected").off();
+        usersRef.off();
+        vehiclesRef.off();
+        sequenceRef.off();
+
+        if(clockInterval) clearInterval(clockInterval);
+        clockInterval = null;
+
+        currentUserRole = null;
+        currentUsername = null;
+        appContainer.style.display = 'none';
+        loginContainer.style.display = 'flex';
+        usernameInput.value = '';
+        passwordInput.value = '';
+        sequenceDateInput.value = '';
+    }
+    
+    function attachDataListeners() {
+        const connectedRef = database.ref(".info/connected");
+        connectedRef.on("value", (snap) => {
+            if (snap.val() === true) {
+                connectionStatusEl.textContent = "เชื่อมต่อแล้ว";
+                connectionStatusEl.className = 'connected';
+            } else {
+                connectionStatusEl.textContent = "ไม่ได้เชื่อมต่อ";
+                connectionStatusEl.className = 'disconnected';
+            }
+        });
+
+        vehiclesRef.on('value', (snapshot) => {
+            const data = snapshot.val();
+            vehicleData = Array.isArray(data) ? data : (data ? Object.values(data) : []);
+            if(vehicleData.length > 0 && vehicleData[0]){
+                 const allKeys = new Set();
+                 vehicleData.forEach(v => Object.keys(v).forEach(k => allKeys.add(k)));
+                 tableHeaders = Array.from(allKeys);
+            }
+            renderAdminTable(vehicleData);
+            applyMultiVinSearch();
+            refreshDynamicViews();
+            
+            if(document.getElementById('edit-data-view').classList.contains('active') && editVinSearchInput.value) {
+                searchAndDisplayEditCard();
+            }
+        });
+
+        sequenceRef.on('value', (snapshot) => {
+            const data = snapshot.val() || {};
+            pendingSequence = data.pending ? Object.entries(data.pending).map(([key, value]) => ({ key, ...value })) : [];
+            confirmedSequence = data.confirmed ? Object.entries(data.confirmed).map(([key, value]) => ({ key, ...value })) : [];
+            refreshDynamicViews();
+            renderOperationHistory(); // Re-render history when sequence data changes
+        });
+
+        if (currentUserRole === 'admin') {
+            usersRef.on('value', (snapshot) => {
+                users = snapshot.val() || {};
+                renderUserTable();
+            });
+        }
+    }
+
+
+    function setupUIForRole(role) {
+        const permittedViews = {
+            'admin': ['operation-view', 'search-view', 'sequence-view', 'dashboard-view', 'edit-data-view', 'admin-view'],
+            'SJWD': ['search-view'],
+            'operation': ['operation-view']
+        };
+
+        let firstVisibleTab = null;
+
+        tabLinks.forEach(link => {
+            const view = link.dataset.view;
+            if (permittedViews[role].includes(view)) {
+                link.style.display = 'flex';
+                if (!firstVisibleTab) {
+                    firstVisibleTab = link;
+                }
+            } else {
+                link.style.display = 'none';
+            }
+        });
+        
+        // Hide specific elements for operation role
+        const exportHistoryButton = document.getElementById('export-history-btn');
+        if (exportHistoryButton) {
+            exportHistoryButton.style.display = (role === 'operation') ? 'none' : 'inline-flex';
+        }
+
+
+        if (firstVisibleTab) {
+            firstVisibleTab.click();
+        }
+    }
+    
+    // --- User Management Functions ---
+    function renderUserTable() {
+        userListTableBody.innerHTML = '';
+        for(const username in users) {
+            const user = users[username];
+            const tr = document.createElement('tr');
+            
+            tr.innerHTML = `<td>${username}</td><td>${user.role}</td>`;
+
+            const tdAction = document.createElement('td');
+            const deleteBtn = document.createElement('button');
+            deleteBtn.textContent = 'ลบ';
+            deleteBtn.className = 'delete-btn';
+            
+            if (username === 'admin' || username === currentUsername) {
+                deleteBtn.disabled = true;
+            } else {
+                deleteBtn.onclick = () => deleteUser(username);
+            }
+            tdAction.appendChild(deleteBtn);
+            tr.appendChild(tdAction);
+            
+            userListTableBody.appendChild(tr);
+        }
+    }
+
+    function addUser() {
+        const newUsername = newUserUsernameInput.value.trim().toLowerCase();
+        const newPassword = newUserPasswordInput.value.trim();
+        const newRole = newUserRoleSelect.value;
+
+        if (!newUsername || !newPassword) return alert('กรุณากรอก Username และ Password');
+        if (users[newUsername]) return alert('Username นี้มีอยู่แล้วในระบบ');
+
+        usersRef.child(newUsername).set({ password: newPassword, role: newRole })
+            .then(() => {
+                alert(`เพิ่มผู้ใช้ '${newUsername}' สำเร็จ`);
+                newUserUsernameInput.value = '';
+                newUserPasswordInput.value = '';
+            })
+            .catch(error => alert('เกิดข้อผิดพลาด: ' + error.message));
+    }
+
+    function deleteUser(usernameToDelete) {
+        if (confirm(`คุณแน่ใจหรือไม่ว่าต้องการลบผู้ใช้ '${usernameToDelete}'?`)) {
+            usersRef.child(usernameToDelete).remove()
+                .then(() => alert(`ลบผู้ใช้ '${usernameToDelete}' สำเร็จ`))
+                .catch(error => alert('เกิดข้อผิดพลาด: ' + error.message));
+        }
+    }
+
+    // --- Core Functions ---
+    function openView(event, viewName) {
+        document.querySelectorAll('.view').forEach(view => view.classList.remove('active'));
+        document.querySelectorAll('.tab-link').forEach(tabLink => tabLink.classList.remove('active'));
+        
+        const targetView = document.getElementById(viewName);
+        if (targetView) targetView.classList.add('active');
+
+        if (event.currentTarget) event.currentTarget.classList.add('active');
+
+        if (viewName === 'sequence-view') {
+            if (!sequenceDateInput.value) {
+                sequenceDateInput.value = new Date().toISOString().split('T')[0];
+            }
+            renderSequenceView();
+        }
+        if (viewName === 'operation-view') {
+            if (!historyDateInput.value) {
+                historyDateInput.value = new Date().toISOString().split('T')[0];
+            }
+            renderOperationHistory();
+        }
+        if (viewName === 'dashboard-view') renderDashboard();
+        if (viewName === 'search-view') renderSearchTable(filteredVehicleData.length > 0 ? filteredVehicleData : vehicleData);
+        if (viewName === 'admin-view' && currentUserRole === 'admin') renderUserTable();
+    }
+
+    function prepareFileForUpload(event) {
+        fileToUpload = event.target.files[0];
+        if (fileToUpload) {
+            confirmUploadBtn.disabled = false;
+            uploadMessage.textContent = `ไฟล์ที่เลือก: ${fileToUpload.name}`;
+            uploadMessage.style.color = '#343a40';
+        } else {
+            confirmUploadBtn.disabled = true;
+            uploadMessage.textContent = '';
+        }
+    }
+
+    function parseCellData(cellData) {
+        if (cellData === null || cellData === undefined || cellData === '') return '';
+        if (cellData instanceof Date) {
+            if (isNaN(cellData.getTime())) return '';
+            return `${cellData.getFullYear()}-${String(cellData.getMonth() + 1).padStart(2, '0')}-${String(cellData.getDate()).padStart(2, '0')}`;
+        }
+        if (typeof cellData === 'number' && cellData > 25569) {
+            try {
+                const date = new Date((cellData - 25569) * 86400 * 1000);
+                if (!isNaN(date.getTime())) return `${date.getUTCFullYear()}-${String(date.getUTCMonth() + 1).padStart(2, '0')}-${String(date.getUTCDate()).padStart(2, '0')}`;
+            } catch(e) {}
+        }
+        if (typeof cellData === 'string') {
+            const str = cellData.trim();
+            const dateRegex = /^(\d{1,2})-([A-Za-z]{3})-(\d{2}|\d{4})$/;
+            const match = str.match(dateRegex);
+            if (match) {
+                const monthMap = { jan: 0, feb: 1, mar: 2, apr: 3, may: 4, jun: 5, jul: 6, aug: 7, sep: 8, oct: 9, nov: 10, dec: 11 };
+                const monthIndex = monthMap[match[2].toLowerCase()];
+                if (monthIndex !== undefined) {
+                    let year = match[3].length === 2 ? `20${match[3]}` : match[3];
+                    const date = new Date(Date.UTC(year, monthIndex, match[1]));
+                     if (!isNaN(date.getTime())) return `${date.getUTCFullYear()}-${String(date.getUTCMonth() + 1).padStart(2, '0')}-${String(date.getUTCDate()).padStart(2, '0')}`;
+                }
+            }
+        }
+        return String(cellData);
+    }
+
+    const sanitizeKey = (key) => key.replace(/[\.#$\[\]\/]/g, "");
+
+    function processPreparedFile() {
+        if (!fileToUpload) return alert("กรุณาเลือกไฟล์ก่อน");
+        loader.style.display = 'block';
+        uploadMessage.textContent = 'กำลังประมวลผลไฟล์...';
+        confirmUploadBtn.disabled = true;
+        fileInput.disabled = true;
+
+        setTimeout(() => {
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                try {
+                    const data = new Uint8Array(e.target.result);
+                    const workbook = XLSX.read(data, { type: 'array', cellDates: true });
+                    if (!workbook.SheetNames || workbook.SheetNames.length === 0) throw new Error('ไม่พบ Sheet ในไฟล์ Excel');
+                    const firstSheetName = workbook.SheetNames[0];
+                    const worksheet = workbook.Sheets[firstSheetName];
+                    if (!worksheet) throw new Error(`ไม่สามารถอ่านข้อมูลจาก Sheet แรก (${firstSheetName}) ได้`);
+                    const dataAsArrayOfArrays = XLSX.utils.sheet_to_json(worksheet, { header: 1, defval: null });
+                    if (!dataAsArrayOfArrays || dataAsArrayOfArrays.length === 0 || dataAsArrayOfArrays.every(row => row.every(cell => cell === null))) throw new Error('ไฟล์ Excel ว่างเปล่าหรือไม่พบข้อมูล');
+
+                    let headerRowIndex = dataAsArrayOfArrays.findIndex(row => row.some(cell => cell !== null && cell !== ""));
+                    if (headerRowIndex === -1) throw new Error('ไม่พบหัวข้อตารางในไฟล์ Excel');
+                    
+                    const rawHeaders = dataAsArrayOfArrays[headerRowIndex];
+                    const headerMap = [];
+                    rawHeaders.forEach((h, i) => {
+                        const originalHeader = String(h || '').trim();
+                        if (originalHeader) {
+                            headerMap.push({ name: sanitizeKey(originalHeader), originalName: originalHeader, index: i });
+                        }
+                    });
+
+                    const newTableHeaders = headerMap.map(h => h.name);
+                    if (!newTableHeaders.some(h => h.toLowerCase() === 'vin')) throw new Error('ไม่พบคอลัมน์ "Vin"');
+
+                    const dataRows = dataAsArrayOfArrays.slice(headerRowIndex + 1);
+                    const newVehicleData = dataRows.map(row => {
+                        const newRow = {};
+                        headerMap.forEach(h => newRow[h.name] = parseCellData(row[h.index]));
+                        return newRow;
+                    }).filter(row => Object.values(row).some(v => v !== "" && v !== null));
+                    
+                    const newVehiclesMap = new Map(newVehicleData.map(v => [v.Vin, v]));
+                    const vinsInNewFile = new Set(newVehiclesMap.keys());
+                    const retainedOldVehicles = vehicleData.filter(oldVehicle => !vinsInNewFile.has(oldVehicle.Vin));
+                    const mergedData = [...retainedOldVehicles, ...newVehicleData];
+
+                    vehiclesRef.set(mergedData)
+                        .then(() => {
+                            uploadMessage.textContent = `อัปเดตข้อมูลสำเร็จ! ประมวลผล ${newVehicleData.length} แถวจากไฟล์`;
+                            uploadMessage.style.color = 'green';
+                        })
+                        .catch(error => { throw error; });
+
+                } catch (error) {
+                    console.error("File parsing error:", error);
+                    const errorMsg = `เกิดข้อผิดพลาด: ${error.message}`;
+                    alert(errorMsg);
+                    uploadMessage.textContent = errorMsg;
+                    uploadMessage.style.color = 'red';
+                } finally {
+                    loader.style.display = 'none';
+                    fileInput.disabled = false;
+                    fileInput.value = '';
+                    fileToUpload = null;
+                    confirmUploadBtn.disabled = true;
+                }
+            };
+            reader.onerror = () => {
+                 loader.style.display = 'none';
+                 fileInput.disabled = false;
+                 const errorMsg = "ไม่สามารถอ่านไฟล์ได้";
+                 alert(errorMsg);
+                 uploadMessage.textContent = errorMsg;
+                 uploadMessage.style.color = 'red';
+                 fileInput.value = '';
+                 fileToUpload = null;
+                 confirmUploadBtn.disabled = true;
+            };
+            reader.readAsArrayBuffer(fileToUpload);
+        }, 50);
+    }
+    
+    function renderTable(data, tableHeaderEl, tableBodyEl) {
+        tableHeaderEl.innerHTML = '';
+        tableBodyEl.innerHTML = '';
+
+        let headersToRender = [...tableHeaders];
+        
+        const colspan = headersToRender.length > 0 ? headersToRender.length + 1 : 1;
+
+        if (headersToRender.length === 0 && vehicleData.length === 0) {
+             tableBodyEl.innerHTML = `<tr><td colspan="1" style="text-align:center;">กรุณาอัพโหลดไฟล์ Excel เพื่อแสดงข้อมูล</td></tr>`;
+             return;
+        }
+
+        if (!data || data.length === 0) {
+            let message = "ไม่มีข้อมูล";
+            tableBodyEl.innerHTML = `<tr><td colspan="${colspan}" style="text-align:center;">${message}</td></tr>`;
+            return;
+        }
+
+        const headerRow = document.createElement('tr');
+        headersToRender.forEach(headerText => {
+            const th = document.createElement('th');
+            th.textContent = headerText;
+            headerRow.appendChild(th);
+        });
+        const actionTh = document.createElement('th');
+        actionTh.textContent = 'Action';
+        headerRow.appendChild(actionTh);
+        tableHeaderEl.appendChild(headerRow);
+
+        data.forEach((row) => {
+            const originalIndex = vehicleData.findIndex(originalRow => originalRow.Vin === row.Vin && originalRow.No === row.No);
+            const tr = document.createElement('tr');
+
+            const holdStatus = String(row['HOLD'] || '').trim().toLowerCase();
+            if (holdStatus === 'hold (ng)') {
+                tr.classList.add('status-ng-row');
+            } else if (holdStatus === 'ok') {
+                tr.classList.add('status-ok-row');
+            } else {
+                tr.classList.add('status-no-hold-row');
+            }
+
+            headersToRender.forEach(header => {
+                const td = document.createElement('td');
+                td.textContent = (row[header] === null || row[header] === undefined) ? '' : row[header];
+                tr.appendChild(td);
+            });
+
+            const actionTd = document.createElement('td');
+            const editBtn = document.createElement('button');
+            editBtn.textContent = 'แก้ไข';
+            editBtn.className = 'edit-btn';
+            if (originalIndex !== -1) {
+                editBtn.onclick = () => openEditModal(originalIndex);
+            } else {
+                editBtn.disabled = true;
+            }
+            actionTd.appendChild(editBtn);
+            tr.appendChild(actionTd);
+            tableBodyEl.appendChild(tr);
+        });
+    }
+    
+    function renderAdminTable(data) {
+        renderTable(data, dataTableHeader, dataTableBody);
+    }
+
+    function renderSearchTable(data) {
+        searchDataTableHeader.innerHTML = '';
+        searchDataTableBody.innerHTML = '';
+
+        const priorityHeaders = ['Allocation Date', 'Vin', 'MODEL NAME', 'Color', 'Remark', 'HOLD'];
+        const existingPriorityHeaders = priorityHeaders.filter(h => tableHeaders.includes(h));
+        const otherHeaders = tableHeaders.filter(h => !existingPriorityHeaders.includes(h));
+        const headersToRender = [...existingPriorityHeaders, ...otherHeaders];
+        searchTableHeaders = headersToRender; // Save for export
+        
+        const colspan = headersToRender.length > 0 ? headersToRender.length : 1;
+
+        if (headersToRender.length === 0 && vehicleData.length === 0) {
+             searchDataTableBody.innerHTML = `<tr><td colspan="1" style="text-align:center;">กรุณาอัพโหลดไฟล์ Excel เพื่อแสดงข้อมูล</td></tr>`;
+             return;
+        }
+        
+        if (!data || data.length === 0) {
+            searchDataTableBody.innerHTML = `<tr><td colspan="${colspan}" style="text-align:center;">ไม่มีข้อมูลที่ตรงกับคำค้นหา</td></tr>`;
+            return;
+        }
+
+        const headerRow = document.createElement('tr');
+        headersToRender.forEach(headerText => {
+            const th = document.createElement('th');
+            th.textContent = headerText;
+            headerRow.appendChild(th);
+        });
+        searchDataTableHeader.appendChild(headerRow);
+
+        data.forEach((row) => {
+            const tr = document.createElement('tr');
+            tr.style.cursor = 'pointer';
+            tr.onclick = () => showVehicleDetailModal(row);
+
+            const holdStatus = String(row['HOLD'] || '').trim().toLowerCase();
+            if (holdStatus === 'hold (ng)') {
+                tr.classList.add('status-ng-row');
+            } else if (holdStatus === 'ok') {
+                tr.classList.add('status-ok-row');
+            } else {
+                tr.classList.add('status-no-hold-row');
+            }
+
+            headersToRender.forEach(header => {
+                const td = document.createElement('td');
+                td.textContent = (row[header] === null || row[header] === undefined) ? '' : row[header];
+                tr.appendChild(td);
+            });
+
+            searchDataTableBody.appendChild(tr);
+        });
+    }
+
+    function applyMultiVinSearch() {
+        const searchText = multiVinSearchInput.value;
+        if (!searchText.trim()) {
+            filteredVehicleData = [...vehicleData];
+            renderSearchTable(filteredVehicleData);
+            return;
+        }
+        
+        const cleanedText = searchText.replace(/\s/g, '');
+        const searchVins = cleanedText.match(/.{1,17}/g) || [];
+        const uniqueSearchVins = [...new Set(searchVins.filter(vin => vin))];
+
+        const filtered = vehicleData.filter(row => 
+            uniqueSearchVins.includes(String(row.Vin || ''))
+        );
+        
+        filteredVehicleData = filtered;
+        renderSearchTable(filtered);
+    }
+
+    function searchByVin() {
+        const searchTerm = vinSearchInput.value.trim();
+        operationResultDiv.innerHTML = '<p>-- ผลการค้นหาจะแสดงที่นี่ --</p>';
+
+        if (searchTerm.length < 5) {
+            showConfirmationModal("กรุณากรอกเลข Vin (เต็ม หรือ 5 ตัวท้าย)", () => {});
+            const confirmBtn = document.getElementById('confirm-action-btn');
+            const cancelBtn = document.getElementById('cancel-action-btn');
+            confirmBtn.textContent = "ตกลง";
+            cancelBtn.style.display = 'none';
+            confirmActionBtn.onclick = () => {
+                closeConfirmationModal();
+                confirmBtn.textContent = "ยืนยัน";
+                cancelBtn.style.display = 'inline-flex';
+            };
+            return;
+        }
+
+        if (vehicleData.length === 0) return operationResultDiv.innerHTML = '<p style="color: orange;">ยังไม่มีข้อมูลในระบบ</p>';
+        
+        const foundIndex = vehicleData.findIndex(row => String(row.Vin || '').endsWith(searchTerm));
+
+        if (foundIndex !== -1) {
+            displayOperationResult(vehicleData[foundIndex], foundIndex);
+        } else {
+            operationResultDiv.innerHTML = `<p>ไม่พบรถที่มีเลข Vin: <span>${searchTerm}</span></p>`;
+        }
+    }
+
+    function displayOperationResult(vehicle, index) {
+        const getVal = (v) => (v === null || v === undefined) ? '' : v;
+        
+        let imageManagementHTML = '';
+        if (currentUserRole !== 'operation') {
+            let imagesHTML = '<h4>รูปภาพ</h4><div id="image-preview">';
+            if (vehicle.images) {
+                Object.values(vehicle.images).forEach(url => {
+                    imagesHTML += `<img src="${url}" alt="Vehicle Image">`;
+                });
+            }
+            imagesHTML += '</div>';
+
+            imageManagementHTML = `
+                <div id="image-upload-section">
+                    <h4>จัดการรูปภาพ</h4>
+                    <input type="file" id="image-upload-input" accept="image/*" style="display:none;">
+                    <button onclick="document.getElementById('image-upload-input').click()">เพิ่มรูปภาพ</button>
+                    <button onclick="openCamera(${index}, '${getVal(vehicle.Vin)}')">เปิดกล้อง</button>
+                    <p id="upload-progress" style="display:none;"></p>
+                    ${imagesHTML}
+                </div>
+            `;
+        }
+
+        let historyHTML = '';
+        if (vehicle.status_history && Array.isArray(vehicle.status_history)) {
+            const reversedHistory = [...vehicle.status_history].reverse();
+            historyHTML = reversedHistory.map(h => {
+                const eventDate = new Date(h.timestamp).toLocaleString('th-TH');
+                return `<li><strong>${h.status}</strong> - โดย ${h.user} - ${eventDate}</li>`;
+            }).join('');
+        }
+
+        operationResultDiv.innerHTML = `
+            <h3>ผลการค้นหา</h3>
+            <p><strong>Vin:</strong> <span>${getVal(vehicle.Vin)}</span></p>
+            <p><strong>MODEL NAME:</strong> <span>${getVal(vehicle['MODEL NAME'])}</span></p>
+            <p><strong>Color:</strong> <span>${getVal(vehicle.Color)}</span></p>
+            <p><strong>Location:</strong> <span>${getVal(vehicle.Location)}</span></p>
+            <p><strong>Remark:</strong> <span>${getVal(vehicle.Remark)}</span></p>
+            <p><strong>Current Status:</strong> <span id="current-status">${getVal(vehicle['Vin of Status']) || 'ยังไม่มีสถานะ'}</span></p>
+            
+            <h4>ประวัติการตรวจสอบ</h4>
+            <ul id="status-history-list">${historyHTML || '<li>ยังไม่มีประวัติ</li>'}</ul>
+
+            <hr>
+            <button class="confirm-ok" onclick="updateStatus(${index}, 'OK')">OK ขาย</button>
+            <button class="confirm-ng" onclick="updateStatus(${index}, 'NG')">CONFIRM NG</button>
+            ${imageManagementHTML}
+        `;
+        
+        if (currentUserRole !== 'operation') {
+            const imageUploadInput = document.getElementById('image-upload-input');
+            if(imageUploadInput) {
+                imageUploadInput.onchange = (e) => {
+                    const file = e.target.files[0];
+                    if (file) {
+                        uploadImageFile(file, getVal(vehicle.Vin), index);
+                    }
+                };
+            }
+        }
+    }
+
+    function refreshDynamicViews() {
+        if (document.getElementById('sequence-view').classList.contains('active')) {
+            renderSequenceView();
+        }
+        if (document.getElementById('dashboard-view').classList.contains('active')) {
+            renderDashboard();
+        }
+    }
+
+    function updateStatus(index, newStatus) {
+        if (!vehicleData[index]) return;
+        const vehicle = vehicleData[index];
+        const vin = vehicle.Vin;
+
+        showConfirmationModal(`คุณต้องการยืนยันสถานะ '${newStatus}' สำหรับ VIN: ${vin} ใช่หรือไม่?`, () => {
+            const currentVehicleHistory = vehicle.status_history || [];
+            const newHistoryEntry = {
+                status: newStatus,
+                user: currentUsername,
+                timestamp: new Date().toISOString()
+            };
+            const updatedVehicleHistory = [...currentVehicleHistory, newHistoryEntry];
+
+            const updates = {
+                'Vin of Status': newStatus,
+                'status_history': updatedVehicleHistory
+            };
+
+            vehiclesRef.child(index).update(updates).then(() => {
+                const itemForSequence = { 
+                    vehicle: {
+                        Vin: vehicle.Vin,
+                       'MODEL NAME': vehicle['MODEL NAME'],
+                        Color: vehicle.Color,
+                    }, 
+                    status: newStatus,
+                    opUser: currentUsername,
+                    opTimestamp: new Date().toISOString()
+                };
+
+                const existingPendingKey = pendingSequence.find(p => p.vehicle.Vin === itemForSequence.vehicle.Vin)?.key;
+                if(!existingPendingKey) {
+                     sequenceRef.child('pending').push(itemForSequence);
+                }
+                
+                vinSearchInput.value = '';
+                operationResultDiv.innerHTML = '<p>-- บันทึกสำเร็จ! กรุณาค้นหาคันต่อไป --</p>';
+                vinSearchInput.focus();
+            }).catch(error => {
+                alert("เกิดข้อผิดพลาดในการบันทึก: " + error.message);
+            });
+        });
+    }
+
+    function renderOperationHistory() {
+        operationHistoryContainer.innerHTML = '';
+        const selectedDate = historyDateInput.value;
+        const historyHeader = document.getElementById('operation-history-header');
+
+        if (!selectedDate) {
+            operationHistoryContainer.innerHTML = '<p>กรุณาเลือกวันที่</p>';
+            if(historyHeader) historyHeader.textContent = 'ประวัติการตรวจสอบ';
+            return;
+        }
+        
+        const allHistoryItems = [...pendingSequence, ...confirmedSequence];
+
+        if (allHistoryItems.length === 0) {
+            operationHistoryContainer.innerHTML = '<p>ไม่มีประวัติการตรวจสอบ</p>';
+            if(historyHeader) historyHeader.textContent = 'ประวัติการตรวจสอบ (0)';
+            return;
+        }
+
+        const filteredHistory = allHistoryItems.filter(item =>
+            item.opTimestamp && item.opTimestamp.startsWith(selectedDate)
+        );
+        
+        if (historyHeader) historyHeader.textContent = `ประวัติการตรวจสอบ (${filteredHistory.length})`;
+        
+        filteredHistory.sort((a, b) => new Date(b.opTimestamp) - new Date(a.opTimestamp));
+
+        if (filteredHistory.length === 0) {
+            operationHistoryContainer.innerHTML = '<p>ไม่มีประวัติการตรวจสอบในวันที่เลือก</p>';
+            return;
+        }
+
+        filteredHistory.forEach(item => {
+            const card = document.createElement('div');
+            card.className = 'sequence-card';
+            const dateTimeString = new Date(item.opTimestamp).toLocaleString('th-TH');
+            const vehicle = item.vehicle;
+            
+            let adminActions = '';
+            if (currentUserRole === 'admin') {
+                const isConfirmed = !!item.adminTimestamp;
+                adminActions = `<div class="ng-item-actions">
+                                    <button class="delete-btn" onclick="deleteHistoryItem('${item.key}', '${vehicle.Vin}', ${isConfirmed})">ลบ</button>
+                                </div>`;
+            }
+
+            card.innerHTML = `
+                ${adminActions}
+                <p><strong>Vin:</strong> ${vehicle.Vin || ''}</p>
+                <p><strong>Model:</strong> ${vehicle['MODEL NAME'] || ''} - <strong>Color:</strong> ${vehicle.Color || 'N/A'}</p>
+                <p><strong>สถานะที่บันทึก:</strong> <span class="status-${item.status.toLowerCase()}">${item.status}</span></p>
+                 <div class="card-footer">
+                    ผู้ตรวจสอบ: ${item.opUser || 'N/A'}<br>
+                    เวลา: ${dateTimeString}
+                </div>
+            `;
+            operationHistoryContainer.appendChild(card);
+        });
+    }
+
+    function exportOperationHistoryToExcel() {
+        const selectedDate = historyDateInput.value;
+        if (!selectedDate) {
+            alert("กรุณาเลือกวันที่ก่อน Export");
+            return;
+        }
+
+        const allHistoryItems = [...pendingSequence, ...confirmedSequence];
+        const filteredHistory = allHistoryItems.filter(item =>
+            item.opTimestamp && item.opTimestamp.startsWith(selectedDate)
+        );
+
+        if (filteredHistory.length === 0) {
+            alert("ไม่มีข้อมูลประวัติในวันที่เลือกสำหรับ Export");
+            return;
+        }
+        
+        filteredHistory.sort((a, b) => new Date(a.opTimestamp) - new Date(b.opTimestamp));
+
+        const dataForSheet = filteredHistory.map(item => {
+            const vehicle = item.vehicle;
+            return {
+                'VIN': vehicle.Vin,
+                'Model': vehicle['MODEL NAME'],
+                'Color': vehicle.Color,
+                'สถานะ': item.status,
+                'ผู้ตรวจสอบ': item.opUser,
+                'วัน-เวลา': new Date(item.opTimestamp).toLocaleString('th-TH')
+            };
+        });
+
+        const worksheet = XLSX.utils.json_to_sheet(dataForSheet);
+        const workbook = XLSX.utils.book_new();
+        XLSX.utils.book_append_sheet(workbook, worksheet, "ประวัติการตรวจสอบ");
+        XLSX.writeFile(workbook, `OperationHistory_${selectedDate}.xlsx`);
+    }
+
+    function deleteHistoryItem(itemKey, vin, isConfirmed = false) {
+        if (currentUserRole !== 'admin') return;
+
+        showConfirmationModal(`คุณแน่ใจหรือไม่ว่าต้องการลบประวัติการตรวจสอบนี้? การกระทำนี้จะย้อนสถานะของรถกลับไปเป็นค่าก่อนหน้า`, () => {
+            const vehicleIndex = vehicleData.findIndex(v => v.Vin === vin);
+            if (vehicleIndex === -1) {
+                console.error("Vehicle not found for history deletion.");
+                alert("เกิดข้อผิดพลาด: ไม่พบข้อมูลรถ");
+                return;
+            }
+
+            const vehicle = vehicleData[vehicleIndex];
+            let history = vehicle.status_history || [];
+
+            if (history.length > 0) {
+                history.pop(); 
+                const newStatus = history.length > 0 ? history[history.length - 1].status : '';
+                const updates = {
+                    'Vin of Status': newStatus,
+                    'status_history': history.length > 0 ? history : null
+                };
+
+                vehiclesRef.child(vehicleIndex).update(updates).then(() => {
+                    const path = isConfirmed ? 'confirmed' : 'pending';
+                    sequenceRef.child(path).child(itemKey).remove().then(() => {
+                        alert('ลบประวัติและย้อนสถานะสำเร็จ');
+                    }).catch(error => {
+                        console.error("Error removing from sequence:", error);
+                        alert("เกิดข้อผิดพลาดในการลบข้อมูล Sequence");
+                    });
+                }).catch(error => {
+                     console.error("Error updating vehicle status:", error);
+                     alert("เกิดข้อผิดพลาดในการย้อนสถานะรถ");
+                });
+
+            } else {
+                 const path = isConfirmed ? 'confirmed' : 'pending';
+                 sequenceRef.child(path).child(itemKey).remove().then(() => {
+                     alert('ลบประวัติสำเร็จ (ไม่มีสถานะให้ย้อนกลับ)');
+                 }).catch(error => {
+                     console.error("Error removing from sequence:", error);
+                     alert("เกิดข้อผิดพลาดในการลบข้อมูล Sequence");
+                 });
+            }
+        });
+    }
+
+    function renderSequenceView() {
+        pendingSequenceContainer.innerHTML = '';
+        confirmedSequenceContainer.innerHTML = '';
+        
+        const selectedDate = sequenceDateInput.value;
+        if (!selectedDate) return;
+
+        const filteredPending = pendingSequence.filter(item => item.opTimestamp && item.opTimestamp.startsWith(selectedDate));
+        const filteredConfirmed = confirmedSequence.filter(item => item.adminTimestamp && item.adminTimestamp.startsWith(selectedDate));
+
+        const pendingHeader = document.querySelector('#pending-sequence-container').parentElement.querySelector('h3');
+        const confirmedHeader = document.querySelector('#confirmed-sequence-container').parentElement.querySelector('h3');
+        if (pendingHeader) pendingHeader.textContent = `รายการรอยืนยัน (${filteredPending.length})`;
+        if (confirmedHeader) confirmedHeader.textContent = `รายการที่ยืนยันแล้ว (${filteredConfirmed.length})`;
+
+        if (filteredPending.length === 0) {
+            pendingSequenceContainer.innerHTML = '<p>ไม่มีรายการรอยืนยันในวันนี้</p>';
+        } else {
+            filteredPending.forEach((item) => {
+                const card = document.createElement('div');
+                card.className = 'sequence-card';
+                const opTime = item.opTimestamp ? new Date(item.opTimestamp).toLocaleString('th-TH') : 'N/A';
+                
+                let adminActions = '';
+                if (currentUserRole === 'admin') {
+                    adminActions = `<div class="ng-item-actions">
+                                        <button class="delete-btn" onclick="deleteHistoryItem('${item.key}', '${item.vehicle.Vin}', false)">ลบ</button>
+                                    </div>`;
+                }
+
+                card.innerHTML = `
+                    ${adminActions}
+                    <p><strong>Vin:</strong> <a href="#" onclick="event.preventDefault(); viewAndEditFromSequence('${item.vehicle.Vin}', '${item.key}')">${item.vehicle.Vin || ''}</a></p>
+                    <p><strong>Model:</strong> ${item.vehicle['MODEL NAME'] || ''}</p>
+                    <p><strong>สถานะจาก Operation:</strong> <span class="status-${item.status.toLowerCase()}">${item.status}</span></p>
+                    <div class="card-footer">
+                        ผู้ตรวจ: ${item.opUser || 'N/A'}<br>
+                        เวลา: ${opTime}
+                    </div>
+                `;
+                pendingSequenceContainer.appendChild(card);
+            });
+        }
+        
+        if (filteredConfirmed.length === 0) {
+            confirmedSequenceContainer.innerHTML = '<p>ยังไม่มีรายการที่ยืนยันแล้วในวันนี้</p>';
+        } else {
+            filteredConfirmed.forEach(item => {
+                const card = document.createElement('div');
+                card.className = 'sequence-card';
+                const opTime = item.opTimestamp ? new Date(item.opTimestamp).toLocaleString('th-TH') : 'N/A';
+                const adminTime = item.adminTimestamp ? new Date(item.adminTimestamp).toLocaleString('th-TH') : 'N/A';
+                
+                let adminActions = '';
+                if (currentUserRole === 'admin') {
+                     adminActions = `<div class="ng-item-actions">
+                                        <button class="delete-btn" onclick="deleteHistoryItem('${item.key}', '${item.vehicle.Vin}', true)">ลบ</button>
+                                    </div>`;
+                }
+
+                card.innerHTML = `
+                    ${adminActions}
+                    <p><strong>Vin:</strong> ${item.vehicle.Vin || ''}</p>
+                    <p><strong>Model:</strong> ${item.vehicle['MODEL NAME'] || ''}</p>
+                    <p><strong>สถานะสุดท้าย:</strong> <span class="status-${item.status.toLowerCase()}">${item.status}</span></p>
+                    <div class="card-footer">
+                        ผู้ตรวจ: ${item.opUser || 'N/A'} (${opTime})<br>
+                        ผู้ยืนยัน: ${item.adminUser || 'N/A'} (${adminTime})
+                    </div>
+                `;
+                confirmedSequenceContainer.appendChild(card);
+            });
+        }
+    }
+
+    function exportSequenceToExcel() {
+        const selectedDate = sequenceDateInput.value;
+        if (!selectedDate) {
+            alert("กรุณาเลือกวันที่ก่อน Export");
+            return;
+        }
+
+        const allItems = [...pendingSequence, ...confirmedSequence].filter(item =>
+            (item.opTimestamp && item.opTimestamp.startsWith(selectedDate)) ||
+            (item.adminTimestamp && item.adminTimestamp.startsWith(selectedDate))
+        );
+
+        if (allItems.length === 0) {
+            alert("ไม่มีข้อมูลในวันที่เลือกสำหรับ Export");
+            return;
+        }
+        
+        allItems.sort((a, b) => new Date(a.opTimestamp) - new Date(b.opTimestamp));
+
+        const dataForSheet = allItems.map(item => {
+            const vehicle = item.vehicle;
+            return {
+                'VIN': vehicle.Vin,
+                'Model': vehicle['MODEL NAME'],
+                'Color': vehicle.Color,
+                'สถานะ': item.status,
+                'ผู้ตรวจสอบ': item.opUser,
+                'เวลาตรวจสอบ': item.opTimestamp ? new Date(item.opTimestamp).toLocaleString('th-TH') : '',
+                'ผู้ยืนยัน': item.adminUser || '',
+                'เวลายืนยัน': item.adminTimestamp ? new Date(item.adminTimestamp).toLocaleString('th-TH') : ''
+            };
+        });
+
+        const worksheet = XLSX.utils.json_to_sheet(dataForSheet);
+        const workbook = XLSX.utils.book_new();
+        XLSX.utils.book_append_sheet(workbook, worksheet, "Sequence Report");
+        XLSX.writeFile(workbook, `SequenceReport_${selectedDate}.xlsx`);
+    }
+
+    function exportSequenceToPDF() {
+        const selectedDate = sequenceDateInput.value;
+        if (!selectedDate) {
+            alert("กรุณาเลือกวันที่ก่อน Export");
+            return;
+        }
+
+        const allItems = [...pendingSequence, ...confirmedSequence].filter(item =>
+            (item.opTimestamp && item.opTimestamp.startsWith(selectedDate)) ||
+            (item.adminTimestamp && item.adminTimestamp.startsWith(selectedDate))
+        );
+
+        if (allItems.length === 0) {
+            alert("ไม่มีข้อมูลในวันที่เลือกสำหรับ Export");
+            return;
+        }
+        
+        allItems.sort((a, b) => new Date(a.opTimestamp) - new Date(b.opTimestamp));
+
+        const reportCard = document.createElement('div');
+        reportCard.id = 'pdf-report-card';
+        reportCard.style.cssText = `
+            position: absolute;
+            left: -9999px;
+            top: 0;
+            width: 900px; /* Increased width for landscape */
+            padding: 20px;
+            background-color: white;
+            font-family: sans-serif;
+            border: 1px solid #ccc;
+        `;
+
+        let tableRows = '';
+        allItems.forEach((item, index) => {
+            tableRows += `
+                <tr>
+                    <td>${index + 1}</td>
+                    <td>${item.vehicle.Vin || ''}</td>
+                    <td>${item.vehicle['MODEL NAME'] || ''}</td>
+                    <td>${item.opUser || ''}</td>
+                    <td>${item.opTimestamp ? new Date(item.opTimestamp).toLocaleTimeString('th-TH') : ''}</td>
+                    <td>${item.adminUser || ''}</td>
+                    <td>${item.adminTimestamp ? new Date(item.adminTimestamp).toLocaleTimeString('th-TH') : ''}</td>
+                </tr>
+            `;
+        });
+        
+        const reportDate = new Date(selectedDate + 'T00:00:00').toLocaleDateString('th-TH', { year: 'numeric', month: 'long', day: 'numeric' });
+
+        reportCard.innerHTML = `
+            <style>
+                #pdf-report-card { box-sizing: border-box; }
+                #pdf-report-card h2, #pdf-report-card h3 { text-align: center; margin: 10px 0; }
+                #pdf-report-card table { width: 100%; border-collapse: collapse; font-size: 12px; margin-top: 20px;}
+                #pdf-report-card th, #pdf-report-card td { border: 1px solid #ddd; padding: 8px; text-align: left; }
+                #pdf-report-card th { background-color: #f2f2f2; }
+            </style>
+            <h2>สรุปรายงานการตรวจสอบ</h2>
+            <h3>ประจำวันที่ ${reportDate}</h3>
+            <p><strong>จำนวนรถที่ตรวจสอบทั้งหมด:</strong> ${allItems.length} คัน</p>
+            <table>
+                <thead>
+                    <tr>
+                        <th>ลำดับ</th>
+                        <th>VIN</th>
+                        <th>Model</th>
+                        <th>ผู้ตรวจสอบ</th>
+                        <th>เวลา</th>
+                        <th>ผู้ยืนยัน</th>
+                        <th>เวลา</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    ${tableRows}
+                </tbody>
+            </table>
+        `;
+        
+        document.body.appendChild(reportCard);
+
+        html2canvas(document.getElementById('pdf-report-card'), { scale: 2 }).then(canvas => {
+            const imgData = canvas.toDataURL('image/png');
+            const { jsPDF } = window.jspdf;
+            
+            // Use A4 landscape and scale the image to fit
+            const pdf = new jsPDF({
+                orientation: 'landscape',
+                unit: 'pt',
+                format: 'a4'
+            });
+
+            const pdfWidth = pdf.internal.pageSize.getWidth();
+            const pdfHeight = pdf.internal.pageSize.getHeight();
+            const canvasWidth = canvas.width;
+            const canvasHeight = canvas.height;
+            const ratio = canvasHeight / canvasWidth;
+
+            let imgWidth = pdfWidth - 40; // 20pt margin on each side
+            let imgHeight = imgWidth * ratio;
+
+            // If height is still too big, scale based on height instead
+            if (imgHeight > pdfHeight - 40) {
+                imgHeight = pdfHeight - 40; // 20pt margin top/bottom
+                imgWidth = imgHeight / ratio;
+            }
+
+            const x = (pdfWidth - imgWidth) / 2;
+            const y = (pdfHeight - imgHeight) / 2;
+
+            pdf.addImage(imgData, 'PNG', x, y, imgWidth, imgHeight);
+            pdf.save(`SequenceReport_${selectedDate}.pdf`);
+            document.body.removeChild(reportCard);
+        });
+    }
+
+    function viewAndEditFromSequence(vin, key) {
+        currentSequenceItemKey = key;
+        document.querySelector('.tab-link[data-view="edit-data-view"]').click();
+        editVinSearchInput.value = vin;
+        searchAndDisplayEditCard();
+    }
+
+    function adminConfirmSequence(key) {
+        const pendingItemRef = sequenceRef.child('pending').child(key);
+        pendingItemRef.once('value', (snapshot) => {
+            const itemToConfirm = snapshot.val();
+            if (itemToConfirm) {
+                itemToConfirm.adminUser = currentUsername;
+                itemToConfirm.adminTimestamp = new Date().toISOString();
+                sequenceRef.child('confirmed').push(itemToConfirm).then(() => {
+                    pendingItemRef.remove();
+                });
+            }
+        });
+    }
+
+    function showVinList(category, value) {
+        let title = '';
+        const filteredVehicles = vehicleData.filter(v => {
+            const vehicleValue = v[category] || 'N/A';
+            return vehicleValue === value;
+        });
+
+        if (category === 'MODEL NAME') {
+            title = `รายการ VIN สำหรับ Model: ${value}`;
+        } else { // Vin of Status
+            title = `รายการ VIN สำหรับ Status: ${value === 'N/A' ? 'ยังไม่มีสถานะ' : value}`;
+        }
+
+        vinListTitle.textContent = title;
+
+        if (filteredVehicles.length === 0) {
+            vinListContent.innerHTML = '<p>ไม่พบข้อมูล VIN</p>';
+        } else {
+            const vinList = filteredVehicles.map(v => v.Vin).join('<br>');
+            vinListContent.innerHTML = vinList;
+        }
+
+        vinListModal.style.display = 'block';
+    }
+
+
+    function renderDashboard() {
+        const modelContainer = document.getElementById('model-dashboard-container');
+        const statusContainer = document.getElementById('status-dashboard-container');
+        modelContainer.innerHTML = '';
+        statusContainer.innerHTML = '';
+
+        if (vehicleData.length === 0) {
+            modelContainer.innerHTML = '<p>ไม่มีข้อมูล</p>';
+            statusContainer.innerHTML = '<p>ไม่มีข้อมูล</p>';
+            return;
+        }
+
+        const modelCounts = vehicleData.reduce((acc, v) => {
+            const model = v['MODEL NAME'] || 'N/A';
+            acc[model] = (acc[model] || 0) + 1;
+            return acc;
+        }, {});
+        const statusCounts = vehicleData.reduce((acc, v) => {
+            const status = v['Vin of Status'] || 'N/A';
+            acc[status] = (acc[status] || 0) + 1;
+            return acc;
+        }, {});
+
+        const sortedModels = Object.keys(modelCounts).sort();
+        for (const model of sortedModels) {
+            const card = document.createElement('div');
+            card.className = 'dashboard-card';
+            card.innerHTML = `<span class="dashboard-card-label">${model}</span><span class="dashboard-card-value">${modelCounts[model]}</span>`;
+            card.onclick = () => showVinList('MODEL NAME', model);
+            modelContainer.appendChild(card);
+        }
+
+        const sortedStatuses = Object.keys(statusCounts).sort();
+        for (const status of sortedStatuses) {
+            const card = document.createElement('div');
+            card.className = 'dashboard-card';
+            card.innerHTML = `<span class="dashboard-card-label">${status === 'N/A' ? 'ยังไม่มีสถานะ' : status}</span><span class="dashboard-card-value">${statusCounts[status]}</span>`;
+            card.onclick = () => showVinList('Vin of Status', status);
+            statusContainer.appendChild(card);
+        }
+    }
+    
+    function openEditModal(index) {
+        if (index < 0 || index >= vehicleData.length) return;
+        currentEditIndex = index;
+        const vehicle = vehicleData[index];
+        modalVinSpan.textContent = vehicle.Vin || '';
+        modalStatusInput.value = vehicle['Vin of Status'] || '';
+        modalRemarkInput.value = vehicle.Remark || '';
+        modal.style.display = 'block';
+    }
+
+    function saveModalChanges() {
+        if (currentEditIndex === -1) return;
+        
+        const updates = {};
+        updates['Vin of Status'] = modalStatusInput.value.trim();
+        updates['Remark'] = modalRemarkInput.value.trim();
+
+        vehiclesRef.child(currentEditIndex).update(updates)
+            .then(() => {
+                alert(`บันทึกข้อมูลสำหรับ Vin: ${vehicleData[currentEditIndex].Vin} เรียบร้อยแล้ว`);
+                modal.style.display = 'none';
+                currentEditIndex = -1;
+            })
+            .catch(error => alert("เกิดข้อผิดพลาดในการบันทึก: " + error.message));
+    }
+
+    // --- Edit Data View Functions ---
+    function searchAndDisplayEditCard() {
+        const vinToSearch = editVinSearchInput.value.trim();
+        editCardContainer.innerHTML = '';
+
+        if (!vinToSearch) {
+            editCardContainer.innerHTML = '<p>กรุณากรอก VIN เพื่อค้นหา</p>';
+            return;
+        }
+
+        const vehicleIndex = vehicleData.findIndex(v => v.Vin === vinToSearch);
+        const vehicle = vehicleData[vehicleIndex];
+
+        if (!vehicle) {
+            editCardContainer.innerHTML = `<p>ไม่พบรถที่มี VIN: ${vinToSearch}</p>`;
+            return;
+        }
+
+        const card = document.createElement('div');
+        card.className = 'edit-card';
+        
+        const holdStatus = String(vehicle['HOLD'] || '').trim().toLowerCase();
+        if (holdStatus === 'hold (ng)') {
+            card.classList.add('status-ng-row');
+        } else if (holdStatus === 'ok') {
+            card.classList.add('status-ok-row');
+        } else {
+            card.classList.add('status-no-hold-row');
+        }
+        
+        // Card Header for key info
+        const header = document.createElement('div');
+        header.className = 'edit-card-header';
+        header.innerHTML = `
+            <div class="header-item"><span>VIN</span><p>${vehicle.Vin || 'N/A'}</p></div>
+            <div class="header-item"><span>Model</span><p>${vehicle['MODEL NAME'] || 'N/A'}</p></div>
+            <div class="header-item"><span>Model Code</span><p>${vehicle['Model Code'] || 'N/A'}</p></div>
+            <div class="header-item"><span>Color</span><p>${vehicle.Color || 'N/A'}</p></div>
+        `;
+        card.appendChild(header);
+        
+        const grid = document.createElement('div');
+        grid.className = 'edit-card-grid';
+        
+        const editableFields = ['Allocation Date', 'Gate In', 'Group No', 'Remark', 'HOLD'];
+        
+        editableFields.forEach(key => {
+            if (tableHeaders.includes(key)) {
+                const fieldContainer = document.createElement('div');
+                const label = document.createElement('label');
+                label.textContent = key;
+                fieldContainer.appendChild(label);
+
+                if (key === 'HOLD') {
+                    const select = document.createElement('select');
+                    select.id = `edit-input-${sanitizeKey(key)}`;
+                    
+                    const optionEmpty = document.createElement('option');
+                    optionEmpty.value = '';
+                    optionEmpty.textContent = '--- เลือกสถานะ ---';
+
+                    const optionOK = document.createElement('option');
+                    optionOK.value = 'OK';
+                    optionOK.textContent = 'OK';
+                    
+                    const optionNG = document.createElement('option');
+                    optionNG.value = 'HOLD (NG)';
+                    optionNG.textContent = 'HOLD (NG)';
+                    
+                    select.appendChild(optionEmpty);
+                    select.appendChild(optionOK);
+                    select.appendChild(optionNG);
+
+                    select.value = vehicle[key] || '';
+                    fieldContainer.appendChild(select);
+                } else {
+                    const input = document.createElement('input');
+                    input.type = 'text';
+                     if (key.toLowerCase().includes('date')) {
+                        input.type = 'date';
+                     }
+                    input.id = `edit-input-${sanitizeKey(key)}`;
+                    input.value = vehicle[key] || '';
+                    fieldContainer.appendChild(input);
+                }
+                grid.appendChild(fieldContainer);
+            }
+        });
+        
+        card.appendChild(grid);
+
+        const footer = document.createElement('div');
+        footer.className = 'edit-card-footer';
+
+        const addNgBtn = document.createElement('button');
+        addNgBtn.textContent = 'เพิ่ม NG';
+        addNgBtn.className = 'confirm-ng';
+        addNgBtn.style.marginRight = '10px';
+        addNgBtn.onclick = () => openNgModal(vehicleIndex);
+        footer.appendChild(addNgBtn);
+
+        const saveBtn = document.createElement('button');
+        saveBtn.textContent = 'บันทึกการเปลี่ยนแปลง';
+        saveBtn.onclick = () => saveFullEdit(vehicleIndex);
+        footer.appendChild(saveBtn);
+        card.appendChild(footer);
+
+        const ngCardsContainer = document.createElement('div');
+        ngCardsContainer.id = 'ng-cards-container';
+        card.appendChild(ngCardsContainer);
+
+        editCardContainer.appendChild(card);
+        renderNgCards(vehicle, vehicleIndex);
+    }
+
+    function saveFullEdit(index) {
+        if (index < 0 || index >= vehicleData.length) return;
+
+        const updates = {};
+        const editableFields = ['Allocation Date', 'Gate In', 'Group No', 'Remark', 'HOLD'];
+        
+        for (const key of editableFields) {
+             const sanitizedKey = sanitizeKey(key);
+            const input = document.getElementById(`edit-input-${sanitizedKey}`);
+            if (input) {
+                updates[key] = input.value;
+            }
+        }
+        
+        vehiclesRef.child(index).update(updates)
+            .then(() => {
+                alert(`บันทึกข้อมูลสำหรับ Vin: ${vehicleData[index].Vin} เรียบร้อยแล้ว`);
+                editCardContainer.innerHTML = '<p>-- ผลการค้นหาจะแสดงที่นี่ --</p>';
+                editVinSearchInput.value = '';
+
+                if (currentSequenceItemKey) {
+                    adminConfirmSequence(currentSequenceItemKey);
+                    currentSequenceItemKey = null;
+                    document.querySelector('.tab-link[data-view="sequence-view"]').click();
+                }
+            })
+            .catch(error => alert("เกิดข้อผิดพลาดในการบันทึก: " + error.message));
+    }
+
+    // --- NG Modal & Card Functions ---
+    function openNgModal(vehicleIndex, ngIndex, ngData) {
+        if (vehicleIndex < 0 || vehicleIndex >= vehicleData.length) return;
+        currentVehicleIndexForNg = vehicleIndex;
+        const vehicle = vehicleData[vehicleIndex];
+        
+        ngModalVinSpan.textContent = vehicle.Vin || '';
+        
+        if(ngData && typeof ngIndex !== 'undefined') { // Editing mode
+            currentNgIndexToEdit = ngIndex;
+            ngModalTitle.textContent = 'แก้ไข NG Defect';
+            ngTypeSelect.value = ngData.type || 'yard';
+            ngLocationInput.value = ngData.location || '';
+            ngItemInput.value = ngData.item || '';
+            ngRepairerInput.value = ngData.repairer || '';
+        } else { // Adding mode
+            currentNgIndexToEdit = -1;
+            ngModalTitle.textContent = 'เพิ่ม NG Defect';
+            ngTypeSelect.value = 'yard';
+            ngLocationInput.value = '';
+            ngItemInput.value = '';
+            ngRepairerInput.value = '';
+        }
+        
+        ngModal.style.display = 'block';
+    }
+
+    function closeNgModal() {
+        ngModal.style.display = 'none';
+        currentVehicleIndexForNg = -1;
+        currentNgIndexToEdit = -1;
+    }
+
+    function saveNgDefect() {
+        if (currentVehicleIndexForNg === -1) return;
+
+        const vehicle = vehicleData[currentVehicleIndexForNg];
+        let ngDetails = vehicle.ng_details || [];
+
+        const historyEntry = {
+            timestamp: new Date().toISOString(),
+            user: currentUsername
+        };
+
+        if (currentNgIndexToEdit !== -1) { // Editing existing defect
+             const defect = ngDetails[currentNgIndexToEdit];
+             if(!defect.history) defect.history = [];
+
+             const changes = [];
+             if (defect.type !== ngTypeSelect.value) changes.push('ประเภท');
+             if (defect.location !== ngLocationInput.value.trim()) changes.push('ตำแหน่ง');
+             if (defect.item !== ngItemInput.value.trim()) changes.push('รายการ');
+             if (defect.repairer !== ngRepairerInput.value.trim()) changes.push('ผู้ซ่อม');
+
+             if (changes.length > 0) {
+                 historyEntry.action = `แก้ไข: ${changes.join(', ')}`;
+                 defect.history.push(historyEntry);
+             }
+
+             defect.type = ngTypeSelect.value;
+             defect.location = ngLocationInput.value.trim();
+             defect.item = ngItemInput.value.trim();
+             defect.repairer = ngRepairerInput.value.trim();
+             
+        } else { // Adding new defect
+            const newNgDefect = {
+                type: ngTypeSelect.value,
+                location: ngLocationInput.value.trim(),
+                item: ngItemInput.value.trim(),
+                repairer: ngRepairerInput.value.trim(),
+                status: 'NG', // Default status for new defect
+                history: []
+            };
+            if (!newNgDefect.location || !newNgDefect.item) {
+                alert('กรุณากรอกตำแหน่งและรายการ NG');
+                return;
+            }
+            historyEntry.action = 'สร้างรายการ';
+            newNgDefect.history.push(historyEntry);
+            ngDetails.push(newNgDefect);
+        }
+        
+        vehiclesRef.child(currentVehicleIndexForNg).child('ng_details').set(ngDetails)
+            .then(() => {
+                alert('บันทึกข้อมูล NG สำเร็จ');
+                closeNgModal();
+            })
+            .catch(error => {
+                alert('เกิดข้อผิดพลาดในการบันทึก NG: ' + error.message);
+            });
+    }
+
+    function deleteNgDefect(vehicleIndex, ngIndex) {
+        showConfirmationModal('คุณแน่ใจหรือไม่ว่าต้องการลบรายการ Defect นี้?', () => {
+            const vehicle = vehicleData[vehicleIndex];
+            if (!vehicle || !vehicle.ng_details || !vehicle.ng_details[ngIndex]) {
+                console.error('Vehicle or defect details not found for deletion.');
+                return;
+            }
+
+            let ngDetails = [...(vehicle.ng_details || [])];
+            ngDetails.splice(ngIndex, 1);
+            
+            vehiclesRef.child(vehicleIndex).child('ng_details').set(ngDetails)
+                .then(() => {
+                    console.log('ลบรายการ Defect สำเร็จ');
+                })
+                .catch(error => {
+                    console.error('เกิดข้อผิดพลาดในการลบ: ' + error.message);
+                });
+        });
+    }
+
+    function toggleNgStatus(vehicleIndex, ngIndex) {
+        const vehicle = vehicleData[vehicleIndex];
+        if (!vehicle || !vehicle.ng_details || !vehicle.ng_details[ngIndex]) return;
+
+        const defect = vehicle.ng_details[ngIndex];
+        const oldStatus = defect.status || 'NG';
+        const newStatus = oldStatus === 'NG' ? 'OK' : 'NG';
+
+        const performUpdate = () => {
+            let ngDetails = [...vehicle.ng_details];
+            const defectToUpdate = ngDetails[ngIndex];
+            defectToUpdate.status = newStatus;
+
+            if (!defectToUpdate.history) defectToUpdate.history = [];
+            defectToUpdate.history.push({
+                action: `เปลี่ยนสถานะ: ${oldStatus} -> ${newStatus}`,
+                timestamp: new Date().toISOString(),
+                user: currentUsername
+            });
+
+            vehiclesRef.child(vehicleIndex).child('ng_details').set(ngDetails)
+                .catch(error => {
+                    alert('เกิดข้อผิดพลาดในการอัปเดตสถานะ: ' + error.message);
+                });
+        };
+
+        if (oldStatus === 'NG' && newStatus === 'OK') {
+            showConfirmationModal('คุณต้องการเปลี่ยนสถานะเป็น OK ใช่หรือไม่?', performUpdate);
+        } else {
+            performUpdate(); // Directly change from OK to NG without confirmation
+        }
+    }
+
+
+    function renderNgCards(vehicle, vehicleIndex) {
+        const container = document.getElementById('ng-cards-container');
+        if (!container) return;
+        container.innerHTML = '';
+        
+        const ngDetails = vehicle.ng_details || [];
+
+        // Don't render anything if there are no defects
+        if (ngDetails.length === 0) {
+            return; 
+        }
+
+        // Calculate counts
+        const yardDefectsCount = ngDetails.filter(ng => ng.type === 'yard').length;
+        const factoryDefectsCount = ngDetails.filter(ng => ng.type === 'factory').length;
+
+        const layout = document.createElement('div');
+        layout.className = 'ng-card-layout';
+        
+        const yardColumn = document.createElement('div');
+        yardColumn.className = 'ng-column';
+        yardColumn.innerHTML = `<h4>Defect Yard (${yardDefectsCount})</h4><div class="ng-column-content" id="yard-ng-content"></div>`;
+        
+        const factoryColumn = document.createElement('div');
+        factoryColumn.className = 'ng-column';
+        factoryColumn.innerHTML = `<h4>Defect โรงงาน (${factoryDefectsCount})</h4><div class="ng-column-content" id="factory-ng-content"></div>`;
+
+        layout.appendChild(yardColumn);
+        layout.appendChild(factoryColumn);
+        container.appendChild(layout);
+
+        const yardContent = document.getElementById('yard-ng-content');
+        const factoryContent = document.getElementById('factory-ng-content');
+
+        let hasYardDefects = false;
+        let hasFactoryDefects = false;
+
+        ngDetails.forEach((ng, index) => {
+            const card = document.createElement('div');
+            card.className = 'ng-item-card';
+            const currentStatus = ng.status || 'NG';
+
+            if (currentStatus === 'OK') {
+                card.classList.add('status-ok');
+            } else {
+                card.classList.add('status-ng');
+            }
+
+            let historyList = '';
+            if (ng.history && ng.history.length > 0) {
+                ng.history.forEach((h, i) => {
+                    const eventDate = new Date(h.timestamp).toLocaleString('th-TH');
+                    historyList += `<li><strong>ครั้งที่ ${i + 1}:</strong> ${h.action} (โดย ${h.user} - ${eventDate})</li>`;
+                });
+            }
+
+            const footerHTML = `
+                <div class="ng-item-footer">
+                    <details>
+                        <summary>ประวัติการแก้ไข</summary>
+                        <ul>${historyList || '<li>ไม่มีประวัติ</li>'}</ul>
+                    </details>
+                </div>`;
+            
+            const statusButtonClass = currentStatus === 'OK' ? 'status-ok' : 'status-ng';
+            const statusButtonText = currentStatus;
+
+            card.innerHTML = `
+                <div class="ng-item-actions">
+                    <button class="edit-btn" onclick="openNgModal(${vehicleIndex}, ${index}, JSON.parse(decodeURIComponent('${encodeURIComponent(JSON.stringify(ng))}')))">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" viewBox="0 0 24 24"><path fill="currentColor" d="M5 21.5v-1.25q0-.525.363-.888t.887-.362h1.45l9.2-9.2-2.3-2.3-9.2 9.2V18q0 .525.363-.888t.887.362h1.25Zm14.2-10.4-2.3-2.3 1.1-1.1q.4-.4.9-.4t.9.4l.5.5q.4.4.4.9t-.4.9l-1.1 1.1Z"/></svg>
+                    </button>
+                    <button class="delete-btn" onclick="deleteNgDefect(${vehicleIndex}, ${index})">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" viewBox="0 0 24 24"><path fill="currentColor" d="M7.125 20.05q-.925 0-1.575-.65T4.9 17.825V6.5H4V5.25h4.5v-.875q0-.55.375-.938T9.75 3h4.5q.55 0 .925.388T15.55 4.375v.875H20V6.5h-.9v11.325q0 .925-.65 1.575t-1.575.65h-9.75Z"/></svg>
+                    </button>
+                </div>
+                <p><strong>ตำแหน่ง:</strong> <span>${ng.location || 'N/A'}</span></p>
+                <p><strong>รายการ:</strong> <span>${ng.item || 'N/A'}</span></p>
+                <p><strong>ผู้ซ่อม:</strong> <span>${ng.repairer || 'N/A'}</span></p>
+                <button class="status-toggle-btn ${statusButtonClass}" onclick="toggleNgStatus(${vehicleIndex}, ${index})">${statusButtonText}</button>
+                ${footerHTML}
+            `;
+            if (ng.type === 'yard') {
+                yardContent.appendChild(card);
+                hasYardDefects = true;
+            } else if (ng.type === 'factory') {
+                factoryContent.appendChild(card);
+                hasFactoryDefects = true;
+            }
+        });
+
+        if (!hasYardDefects) {
+            yardContent.innerHTML = '<p>ไม่มี Defect</p>';
+        }
+        if (!hasFactoryDefects) {
+            factoryContent.innerHTML = '<p>ไม่มี Defect</p>';
+        }
+    }
+    
+    // --- Detail Modal Functions ---
+    function showVehicleDetailModal(vehicle) {
+        if (!vehicle) return;
+        
+        document.getElementById('detail-modal-title').textContent = `รายละเอียดรถยนต์: ${vehicle.Vin}`;
+        
+        // Populate general info
+        let detailContentHTML = `
+            <div class="header-item"><span>VIN</span><p>${vehicle.Vin || 'N/A'}</p></div>
+            <div class="header-item"><span>Model</span><p>${vehicle['MODEL NAME'] || 'N/A'}</p></div>
+            <div class="header-item"><span>Color</span><p>${vehicle.Color || 'N/A'}</p></div>
+            <div class="header-item"><span>HOLD Status</span><p>${vehicle.HOLD || 'N/A'}</p></div>
+            <div class="header-item"><span>Allocation Date</span><p>${vehicle['Allocation Date'] || 'N/A'}</p></div>
+            <div class="header-item"><span>Gate In</span><p>${vehicle['Gate In'] || 'N/A'}</p></div>
+            <div class="header-item"><span>Group No</span><p>${vehicle['Group No'] || 'N/A'}</p></div>
+            <div class="header-item"><span>Remark</span><p>${vehicle.Remark || 'N/A'}</p></div>
+        `;
+        vehicleDetailContent.innerHTML = detailContentHTML;
+
+        // Render NG cards
+        renderDetailNgCards(vehicle);
+
+        vehicleDetailModal.style.display = 'block';
+    }
+
+    function renderDetailNgCards(vehicle) {
+        vehicleDetailNgCards.innerHTML = '';
+        
+        const ngDetails = vehicle.ng_details || [];
+
+        if (ngDetails.length === 0) {
+            vehicleDetailNgCards.innerHTML = '<p style="text-align: center; padding: 20px;">ไม่มีข้อมูล Defect</p>';
+            return; 
+        }
+
+        const yardDefectsCount = ngDetails.filter(ng => ng.type === 'yard').length;
+        const factoryDefectsCount = ngDetails.filter(ng => ng.type === 'factory').length;
+
+        const layout = document.createElement('div');
+        layout.className = 'ng-card-layout';
+        
+        const yardColumn = document.createElement('div');
+        yardColumn.className = 'ng-column';
+        yardColumn.innerHTML = `<h4>Defect Yard (${yardDefectsCount})</h4><div class="ng-column-content" id="detail-yard-ng-content"></div>`;
+        
+        const factoryColumn = document.createElement('div');
+        factoryColumn.className = 'ng-column';
+        factoryColumn.innerHTML = `<h4>Defect โรงงาน (${factoryDefectsCount})</h4><div class="ng-column-content" id="detail-factory-ng-content"></div>`;
+
+        layout.appendChild(yardColumn);
+        layout.appendChild(factoryColumn);
+        vehicleDetailNgCards.appendChild(layout);
+
+        const yardContent = document.getElementById('detail-yard-ng-content');
+        const factoryContent = document.getElementById('detail-factory-ng-content');
+
+        let hasYardDefects = false;
+        let hasFactoryDefects = false;
+
+        ngDetails.forEach((ng) => {
+            const card = document.createElement('div');
+            card.className = 'ng-item-card';
+            const currentStatus = ng.status || 'NG';
+
+            if (currentStatus === 'OK') {
+                card.classList.add('status-ok');
+            } else {
+                card.classList.add('status-ng');
+            }
+            
+            let historyList = '';
+            if (ng.history && ng.history.length > 0) {
+                ng.history.forEach((h, i) => {
+                    const eventDate = new Date(h.timestamp).toLocaleString('th-TH');
+                    historyList += `<li><strong>ครั้งที่ ${i + 1}:</strong> ${h.action} (โดย ${h.user} - ${eventDate})</li>`;
+                });
+            }
+
+            const footerHTML = `
+                <div class="ng-item-footer">
+                    <details>
+                        <summary>ประวัติการแก้ไข</summary>
+                        <ul>${historyList || '<li>ไม่มีประวัติ</li>'}</ul>
+                    </details>
+                </div>`;
+            
+            const statusIndicator = `<p><strong>สถานะ:</strong> <span class="status-${currentStatus.toLowerCase()}">${currentStatus}</span></p>`;
+
+            card.innerHTML = `
+                <p><strong>ตำแหน่ง:</strong> <span>${ng.location || 'N/A'}</span></p>
+                <p><strong>รายการ:</strong> <span>${ng.item || 'N/A'}</span></p>
+                <p><strong>ผู้ซ่อม:</strong> <span>${ng.repairer || 'N/A'}</span></p>
+                ${statusIndicator}
+                ${footerHTML}
+            `;
+            if (ng.type === 'yard') {
+                yardContent.appendChild(card);
+                hasYardDefects = true;
+            } else if (ng.type === 'factory') {
+                factoryContent.appendChild(card);
+                hasFactoryDefects = true;
+            }
+        });
+
+        if (!hasYardDefects) {
+            yardContent.innerHTML = '<p>ไม่มี Defect</p>';
+        }
+        if (!hasFactoryDefects) {
+            factoryContent.innerHTML = '<p>ไม่มี Defect</p>';
+        }
+    }
+
+
+    // --- Image & Camera Functions ---
+    function openCamera(index, vin) {
+        if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
+            currentVehicleForPhoto = { index, vin };
+            navigator.mediaDevices.getUserMedia({ video: true })
+                .then(stream => {
+                    cameraStream = stream;
+                    cameraFeed.srcObject = stream;
+                    cameraView.style.display = 'flex';
+                })
+                .catch(err => {
+                    console.error("Error accessing camera: ", err);
+                    alert("ไม่สามารถเข้าถึงกล้องได้ กรุณาตรวจสอบการอนุญาต");
+                });
+        } else {
+            alert("เบราว์เซอร์ของคุณไม่รองรับการใช้งานกล้อง");
+        }
+    }
+
+    function closeCamera() {
+        if (cameraStream) {
+            cameraStream.getTracks().forEach(track => track.stop());
+        }
+        cameraView.style.display = 'none';
+        cameraStream = null;
+        currentVehicleForPhoto = null;
+    }
+
+    function captureImage() {
+        if (!currentVehicleForPhoto) return;
+        const context = cameraCanvas.getContext('2d');
+        cameraCanvas.width = cameraFeed.videoWidth;
+        cameraCanvas.height = cameraFeed.videoHeight;
+        context.drawImage(cameraFeed, 0, 0, cameraCanvas.width, cameraCanvas.height);
+        
+        cameraCanvas.toBlob(blob => {
+            const fileName = `${currentVehicleForPhoto.vin}-${new Date().getTime()}.jpg`;
+            const file = new File([blob], fileName, { type: 'image/jpeg' });
+            uploadImageFile(file, currentVehicleForPhoto.vin, currentVehicleForPhoto.index);
+        }, 'image/jpeg');
+
+        closeCamera();
+    }
+
+    function uploadImageFile(file, vin, index) {
+        if (!file) return;
+
+        const uploadProgress = document.getElementById('upload-progress');
+        if (uploadProgress) {
+            uploadProgress.textContent = 'กำลังอัปโหลด... 0%';
+            uploadProgress.style.display = 'block';
+        }
+        
+        const filePath = `finalcheck/final/${vin}/${file.name}`;
+        const storageRef = storage.ref(filePath);
+        const uploadTask = storageRef.put(file);
+
+        uploadTask.on('state_changed', 
+            (snapshot) => {
+                const progress = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
+                if (uploadProgress) {
+                    uploadProgress.textContent = `กำลังอัปโหลด... ${Math.round(progress)}%`;
+                }
+            }, 
+            (error) => {
+                console.error("Upload failed:", error);
+                alert("อัปโหลดรูปภาพล้มเหลว");
+                if (uploadProgress) uploadProgress.style.display = 'none';
+            }, 
+            () => {
+                uploadTask.snapshot.ref.getDownloadURL().then((downloadURL) => {
+                    if (uploadProgress) uploadProgress.style.display = 'none';
+                    vehiclesRef.child(index).child('images').push(downloadURL);
+                    alert("อัปโหลดรูปภาพสำเร็จ!");
+                });
+            }
+        );
+    }
+    
+    function formatDateForExport(dateString) {
+        if (typeof dateString !== 'string' || !/^\d{4}-\d{2}-\d{2}$/.test(dateString)) {
+            return dateString;
+        }
+        try {
+            const date = new Date(dateString + 'T00:00:00Z');
+            if (isNaN(date.getTime())) return dateString;
+            const monthNames = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+            const day = date.getUTCDate();
+            const mon = monthNames[date.getUTCMonth()];
+            const yy = String(date.getUTCFullYear()).slice(-2);
+            return `${day}-${mon}-${yy}`;
+        } catch (e) {
+            return dateString;
+        }
+    }
+
+    function exportData(dataToExport, fileName, headersForExport) {
+        if (dataToExport.length === 0) return alert("ไม่มีข้อมูลสำหรับส่งออก");
+        
+        const headers = headersForExport || tableHeaders;
+
+        const dataForSheet = dataToExport.map(row => {
+            const orderedRow = {};
+            headers.forEach(header => {
+                const originalValue = (row[header] === null || row[header] === undefined) ? '' : row[header];
+                orderedRow[header] = formatDateForExport(originalValue);
+            });
+            return orderedRow;
+        });
+
+        const worksheet = XLSX.utils.json_to_sheet(dataForSheet, { header: headers });
+        const workbook = XLSX.utils.book_new();
+        XLSX.utils.book_append_sheet(workbook, worksheet, "VehicleData");
+        const date = new Date();
+        const timestamp = `${date.getFullYear()}${(date.getMonth()+1).toString().padStart(2,'0')}${date.getDate().toString().padStart(2,'0')}_${date.getHours().toString().padStart(2,'0')}${date.getMinutes().toString().padStart(2,'0')}`;
+        XLSX.writeFile(workbook, `${fileName}_${timestamp}.xlsx`);
+    }
+
+    function exportToExcel() {
+        exportData(vehicleData, "VehicleExport_All", tableHeaders);
+    }
+    
+    function exportFilteredToExcel() {
+        exportData(filteredVehicleData, "VehicleExport_Filtered", searchTableHeaders);
+    }
+</script>
+
+</body>
+</html>
+
